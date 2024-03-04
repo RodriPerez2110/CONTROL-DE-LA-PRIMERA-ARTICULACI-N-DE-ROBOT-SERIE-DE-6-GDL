@@ -358,7 +358,7 @@ El subsistema térmico de la planta no puede ser despreciado debido a la relativ
 \subsubsection{Elaboración del Modelo:}
 \label{sec:Elaboración del Modelo:}
 
-Como se explicará en la sección \ref{sec:CONTROLADOR} donde se diseña al controlador, el primer paso para implementar la técnica de control gain scheduling, es obtener un modelo lineal de la planta a controlar.
+Como se explicará en la sección \ref{sec:CONTROLADOR} donde se diseña al controlador, la primer etapa para implementar la técnica de control gain scheduling, es obtener un modelo lineal de la planta a controlar.
 Desde el punto de vista de transformaciones de energía, el modelo del sistema consiste de tres subsistemas: el subsistema mecánico, el subsistema electromagnético y el subsistema térmico. Aunque como se menconó el subsistema térmico no será tenido en cuenta.
 
 \subsubsection{SUBSISTEMA MECÁNICO:}
@@ -1243,7 +1243,7 @@ Entonces se pueden igualar los términos de ambas expresiones, de donde se obtie
     \zeta=\frac{R_a.J_{eq}+L_a.b_{eq}}{L_a.J_{eq}\text{.2}.\omega_n}
 \end{align}
 
-Particularmente, al tratarse de un sistema LPV, el análisis del modelo debe realizar para varios valores del parámetro variable $J_{eq}(t)$, para así tener una mayor certeza de que el sistema se comporte como se espera, en todos sus puntos de operación. Entonces se proce atomar 4 valores de $J_{eq}(t)$, igualmente separados por un paso igual a:
+Particularmente, al tratarse de un sistema LPV, el análisis del modelo debe realizar para varios valores del parámetro variable $J_{eq}(t)$, para así tener una mayor certeza de que el sistema se comporte como se espera, en todos sus puntos de operación. Entonces se procede a tomar 4 valores de $J_{eq}(t)$, igualmente separados por un paso igual a:
 
 \begin{align} \label{eq:Paso para la selección de los valores del parámetro variable J_eq(t)}
     \frac{J_{eq_{\text{máx.}}}-J_{eq_{\text{mín.}}}}{4}=1,56 ~[kg.m^2]
@@ -1455,13 +1455,37 @@ Cabe aclarar que, el observador de estados y el controlador PID son ambos partes
 % Si resultara que el controlador I-PD porpuesto no lograra cumplir con los objetivos del proyecto, entonces se optaría por implementar alguna de las variaciones del controlador PID, como un controlador PID de dos grados de libertad.
 
 
-
-
 \subsubsection{GAIN SCHEDULING}
 \label{sec:GAIN SCHEDULING}
 
 Debido a que la planta planta es un Sistema LPV, entonces como se mencionó, se implementará la técnica de Gain Scheduling a dicho controlador I-PD.
 
+SCHEDULING VARIABLE y PASO DE DISCRETIZACIÓN=CANTIDAD DE PIDs:
+Simplemente hay que hacer que las ganancias del PID cambien solo cuando cambie un cierto valor fijo (un paso) el MOMENTO DE INERCIA, el cual ES NUESTRA ÚNICA VARIABLE DE PROGRAMACIÓN (SCHEDULING VARIABLE). No cuando se modifique un cierto ángulo cada articulación. Este paso debe ser lo suficientemente pequeño como para obtener un buen desempeño del sistema en cualquier punto de todo su rango de operación; pero no demasiado pequeño porque mientras más pequeño sea, implica más puntos de operación en donde se tienen que ajustar las ganancias del PID, y tendríamos que ajustar demasiados PIDs, [es decir, se tendría una matriz (vector en mi caso, por tener solo una Variable de Scheduling) con muchas casillas, muchos PIDs].
+
+En términos generales, el diseño de un sistema de control de programación de ganancias requiere cuatro etapas:
+\begin{enumerate}
+    \item LINEALIZAR LA PLANTA EN CADA PUNTO DE OPERACIÓN DE DISEÑO (DESIGN OPERATING CONDITION).
+    \item AJUSTAR LAS GANANCIAS DEL CONTROLADOR PID EN CADA PUNTO DE OPERACIÓN DE DISEÑO.
+    \item IMPLEMENTAR UNA ARQUITECTURA (SCHEDULING ARCHITECTURE) QUE INTERCAMBIE ENTRE LAS GANANCIAS DEL PID ESTABLECIDAS, BASADO EN LA O LAS VARIABLES DE PROGRAMACIÓN (SCHEDULING VARIABLES).
+    % - A SIMPLE SWITCH:
+    %         if(someValue < value):
+    %             gain_set = A;
+    %         elseif(someValue >= value):
+    %             gain_set = B;
+    %         end
+    %     Este simple intercambiador, suele no ser una buena alternativa en la mayoría de sistemas, produce sacudones no deseadas cuando se produce el intercambio. Esto es debido a que al ir cambiando las variables de programación del sistema de forma continua, al cambiar de forma discreta las ganancias del PID, el error que se produce un salto discreto en la/s variable/s manipulada/s, lo que crea (un sacudón) oscilaciones no deseadas es la salida del sistema
+    % - A TRANSIENT-FREE SWITCH:
+    %     Este intercambiador de ganancias, consiste en hacer que el cambio en el valor de las ganancias sea más suave, haciendo que la curva de ganancia vs tiempo siga una ecuación polinómica. Como por ejemplo la ecuación de una línea recta (ver imagen), o mejor aún, una curva más suave en el tiempo como  una ecuación cuadrática (la cual también se puede construir como una serie de puntos que luego se interpolan), desde un punto de operación de diseño a otro.
+    %     Y si se tuviera más de una variable de programación, entonces se tendría una superficie sueave que une los puntos, en ejes cartesiasnos (variable1, variable2, tiempo). Y si se tuvieran más variables de programación simplemente esta superficie se vuelve de orden mayor, y no la podemos visualizar, al menos no fácilmente.
+    %     - Herramientas SYS_TUNE y CONTROL_SYSTEM_TUNER de MATLAB and Simulink:
+    %             Estas herramientas permiten:
+    %                 - Elegir los puntos de operación de diseño.
+    %                 - Definir la superficie de variables de programación vs tiempo como una superfície polómica (mediante una ecuación).
+    %                 - AJUSTAR (Tunear) AUTOMÁTICAMENTE LAS GANANCIAS DEL PID, en cada punto de operación de diseño. (ejemplo en descripción del video).
+    \item EVALUAR EL DESEMPEÑO DEL CONTROL EN DIFERENTES PUNTOS DE OPERACIÓN:
+Esta evaluación conviene hacerla automáticamente por simulación, ya que es mucho más rápido que hacerla manualmente. Y claro que no se va a evaluar cada posible punto (ya que son demasiados, infinitos en la realidad) por lo que hay que elegir cuidadosamente cuáles puntos de operación evaluamos y cuales no. hay que asegurarse que evaluamos todas las transiciones y las casos esquinas (corner cases).
+\end{enumerate}
 
 
 
@@ -1487,8 +1511,10 @@ Debido a que la planta planta es un Sistema LPV, entonces como se mencionó, se 
 
 
 
+\subsubsection{FILTRO DE KALMAN}
+\label{sec:FILTRO DE KALMAN}
 
-
+% El FILTRO DE KALMAN, ES UN ESTIMADOR DE ESTADOS (es decir: es UN OBSERVADOR) SOLO QUE CALCULA LA MATRIZ L DE OTRA FORMA: CONSIDERANDO QUE el sistema está afectado por ruido. Considera que TANTO LOS ESTADOS 'x' COMO LA SALIDA 'y' DEL SISTEMA ESTÁN AFECTADOS POR RUIDO CON DISTRIBUCIÓN GAUSSIANA O NORMAL, Y CON MEDIA CERO. Además de ser un estimador, ES UN ESTIMADOR ÓPTIMO, ya que trata de encontrar los valores de 'x' y de 'y', a partir de minimizar el error entre los estados 'x' reales del sistema, y los estados $^$x estimados.
 
 % ======================================================================
 \subsection{PROCESAMIENTO DE SEÑALES}
@@ -1513,8 +1539,6 @@ Se le agragará ruido blanco gaussiano en el sensor, y se incorporará un filtro
 ENCODER: Tenemos un sensor ideal (porque es la posición de un valor de un ángulo de un eslabón). Entonces se que genera un vector de ruido aleatorio y se lo sumamos. [Este vector de ruido aleatorio tiene un valor que se correponde con el ENCODER COMERCIAL que usa el robot].
 
 [Sensores como: Tacogenerador, Sensor de Efecto Hall, Encoder (incremental, absoluto y/o serial), Resolver]
-
-[[[Actuadores con encoders como sistemas de retroalimentación que permiten un control preciso de la posición, la velocidad y la torsión.]]]
 
 [[[BLDC motors usually require position feedback via Hall Effect sensors, optical encoders, or via sensing of back-EMF.]]] %https://ar.mouser.com/applications/considerations-choosing-advance-robotics/?_gl=1*8fhvyb*_ga*NjIwNDUxOTA5LjE3MDAyNjA1Mjk.*_ga_15W4STQT4T*MTcwNzI0NTg0MC4yLjAuMTcwNzI0NTg0OC41Mi4wLjA.*_ga_1KQLCYKRX3*MTcwNzI0NTg0MC4xLjAuMTcwNzI0NTg0OC4wLjAuMA..$
 
@@ -1738,7 +1762,8 @@ Como se había comentado, el controlador general consiste tanto del bloque contr
 
 
 
-
+EVALUACIÓN DE ESTABILIDAD:
+- [[[["Luego de realizar la discretización del controlador se debe evaluar la estabilidad del sistema, ya que al ejecutar el controlador en una computadora (digital claro) se introducen retardos, debido a lo que se demora en ejecutar el algoritmo en cada iteración, lo que hace que en el diagrama de Bode se corra la curva de fase vs frecuencia hacia abajo, disminuyendo el margen de fase, lo que puede hacer que el sistema se vuelva inestable"]]]]
 
 %======================================================================
 \section{RESULTADOS}
