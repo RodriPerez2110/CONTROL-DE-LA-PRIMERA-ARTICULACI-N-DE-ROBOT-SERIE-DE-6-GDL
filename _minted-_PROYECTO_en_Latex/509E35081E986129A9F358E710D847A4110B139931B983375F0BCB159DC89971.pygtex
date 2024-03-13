@@ -1,0 +1,142 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{c}{\PYGZpc{}Control y Sistemas | Facultad de Ingeniería}
+\PYG{c}{\PYGZpc{}Proyecto Integrador | Febrero de 2024}
+\PYG{c}{\PYGZpc{}Rodrigo Pérez(11068)}
+
+\PYG{n+nb}{clear}\PYG{p}{;}\PYG{+w}{ }\PYG{n+nb}{clc}\PYG{p}{;}\PYG{+w}{ }\PYG{n}{close}\PYG{+w}{ }\PYG{l+s}{all}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} PLANTA}
+
+\PYG{c}{\PYGZpc{}Parámetros Dinámicos:}
+\PYG{n}{Jl\PYGZus{}min}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.56982}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[kg.m\PYGZca{}2]}
+\PYG{n}{Jl\PYGZus{}max}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{12.54696}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[kg.m\PYGZca{}2]}
+\PYG{n}{Jeq\PYGZus{}min}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{6.58e\PYGZhy{}4}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[kg.m\PYGZca{}2]}
+\PYG{n}{Jeq\PYGZus{}max}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{11.26e\PYGZhy{}4}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[kg.m\PYGZca{}2]}
+\PYG{n}{Jm}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{6.356e\PYGZhy{}4}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[kg.m\PYGZca{}2] (Momento de inercia del rotor junto con la caja reductora).}
+\PYG{n}{beq}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{3.70e\PYGZhy{}4}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[(N.m)/(rad/s)]}
+\PYG{n}{r}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{160}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{}Parámetros Eléctricos:}
+\PYG{n}{Ra}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.7}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[ohm]}
+\PYG{n}{La}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.0013}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[H]}
+\PYG{n}{KE}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{0.1412}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[(N.m)/A]}
+\PYG{n}{KT}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{KE}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{}Puntos de Operación:}
+\PYG{n+nb}{format}\PYG{+w}{ }\PYG{n}{long}
+\PYG{n}{CantPuntosOp}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{4}\PYG{p}{;}
+\PYG{n}{paso\PYGZus{}Jl}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Jl\PYGZus{}max}\PYG{o}{\PYGZhy{}}\PYG{n}{Jl\PYGZus{}min}\PYG{p}{)}\PYG{o}{/}\PYG{p}{(}\PYG{n}{CantPuntosOp}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{n}{Jl}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{n}{Jeq}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{n}{Jl}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jl\PYGZus{}min}\PYG{p}{;}
+\PYG{n}{Jl}\PYG{p}{(}\PYG{n}{CantPuntosOp}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jl\PYGZus{}max}\PYG{p}{;}
+\PYG{n}{Jeq}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jm}\PYG{o}{+}\PYG{n}{Jl\PYGZus{}min}\PYG{o}{/}\PYG{n}{r}\PYGZca{}\PYG{l+m+mi}{2}\PYG{p}{;}
+\PYG{n}{Jeq}\PYG{p}{(}\PYG{n}{CantPuntosOp}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jm}\PYG{o}{+}\PYG{n}{Jl\PYGZus{}max}\PYG{o}{/}\PYG{n}{r}\PYGZca{}\PYG{l+m+mi}{2}\PYG{p}{;}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{2}\PYG{p}{:}\PYG{n}{CantPuntosOp}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
+\PYG{+w}{  }\PYG{n}{Jl}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jl}\PYG{p}{(}\PYG{n+nb}{i}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{p}{)}\PYG{o}{+}\PYG{n}{paso\PYGZus{}Jl}\PYG{p}{;}
+\PYG{+w}{  }\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Jm}\PYG{o}{+}\PYG{n}{Jl}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{/}\PYG{n}{r}\PYGZca{}\PYG{l+m+mi}{2}\PYG{p}{;}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{} Familia de Plantas:}
+\PYG{n}{CantSalidas}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{p}{;}
+\PYG{n}{CantEntradas}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{p}{;}
+\PYG{n}{Plantas}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{ss}\PYG{p}{(}\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{n}{CantSalidas}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{CantEntradas}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{CantPuntosOp}\PYG{p}{));}\PYG{+w}{ }\PYG{c}{\PYGZpc{} Inicialización de plantas con ceros}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{A}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{n}{beq}\PYG{o}{/}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{KT}\PYG{o}{/}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{n}{KE}\PYG{o}{/}\PYG{n}{La}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{n}{Ra}\PYG{o}{/}\PYG{n}{La}\PYG{p}{];}
+\PYG{+w}{  }\PYG{n}{B}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{l+m+mi}{1}\PYG{o}{/}\PYG{n}{La}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{];}
+\PYG{+w}{  }\PYG{n}{C}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{];}
+\PYG{+w}{  }\PYG{n}{D}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{l+m+mi}{0}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{];}
+\PYG{+w}{  }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{ss}\PYG{p}{(}\PYG{n}{A}\PYG{p}{,}\PYG{n}{B}\PYG{p}{,}\PYG{n}{C}\PYG{p}{,}\PYG{n}{D}\PYG{p}{);}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} ANÁLISIS de ESTABILIDAD Y AMORTIGUAMIENTO DE LAS PLANTAS a lazo abierto}
+
+\PYG{c}{\PYGZpc{}PARÁMETROS DE SEGUNDO ORDEN de las Plantas a Lazo Abierto, respecto a la Entrada Manipulada \PYGZsq{}va\PYGZsq{}:}
+\PYG{n}{wn}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{n}{z}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{sqrt}\PYG{p}{((}\PYG{n}{Ra}\PYG{o}{*}\PYG{n}{beq}\PYG{o}{+}\PYG{n}{KT}\PYG{o}{*}\PYG{n}{KE}\PYG{p}{)}\PYG{o}{/}\PYG{p}{(}\PYG{n}{La}\PYG{o}{*}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)));}
+\PYG{+w}{  }\PYG{n}{z}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{Ra}\PYG{o}{*}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{+}\PYG{n}{La}\PYG{o}{*}\PYG{n}{beq}\PYG{p}{)}\PYG{o}{/}\PYG{p}{(}\PYG{n}{La}\PYG{o}{*}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{*}\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{));}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{} POLOS de la Planta a Lazo Abierto, respecto a la Entrada Manipulada:}
+\PYG{n}{syms}\PYG{+w}{ }\PYG{l+s}{s}
+\PYG{n}{P}\PYG{p}{=}\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{n}{Pp}\PYG{p}{=}\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{);}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{P}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{La}\PYG{o}{*}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{))}\PYG{o}{*}\PYG{p}{(}\PYG{n}{s}\PYGZca{}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{z}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{*}\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{*}\PYG{n}{s}\PYG{+w}{ }\PYG{o}{+}\PYG{+w}{ }\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYGZca{}\PYG{l+m+mi}{2}\PYG{p}{);}
+\PYG{+w}{  }\PYG{n}{Pp}\PYG{p}{(:,}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{double}\PYG{p}{(}\PYG{n}{solve}\PYG{p}{(}\PYG{n}{P}\PYG{o}{==}\PYG{l+m+mi}{0}\PYG{p}{,}\PYG{n}{s}\PYG{p}{));}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{}MAPA DE POLOS Y CEROS de la Planta a Lazo Abierto, respecto a la Entrada Manipulada:}
+\PYG{n}{Gva}\PYG{p}{=}\PYG{n}{tf}\PYG{p}{(}\PYG{n+nb}{zeros}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{CantPuntosOp}\PYG{p}{));}
+\PYG{n+nb}{figure}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{);}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{on}\PYG{p}{;}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{Gva}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{tf}\PYG{p}{((}\PYG{n}{KT}\PYG{o}{/}\PYG{p}{(}\PYG{n}{La}\PYG{o}{*}\PYG{n}{Jeq}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{))),[}\PYG{l+m+mi}{1}\PYG{+w}{ }\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{z}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{o}{*}\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYG{+w}{ }\PYG{n}{wn}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{)}\PYGZca{}\PYG{l+m+mi}{2}\PYG{+w}{ }\PYG{l+m+mi}{0}\PYG{p}{]);}
+\PYG{+w}{  }\PYG{n}{pzmap}\PYG{p}{(}\PYG{n}{Gva}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{));}
+\PYG{+w}{  }\PYG{n}{hm}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n+nb}{findobj}\PYG{p}{(}\PYG{n+nb}{gca}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZsq{}Type\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZsq{}Line\PYGZsq{}}\PYG{p}{);}\PYG{+w}{          }\PYG{c}{\PYGZpc{} Handle To \PYGZsq{}Line\PYGZsq{} Objects}
+\PYG{+w}{  }\PYG{n}{hm}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{).}\PYG{n}{MarkerSize}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{20}\PYG{p}{;}\PYG{+w}{                      }\PYG{c}{\PYGZpc{} ‘Zero’ Marker}
+\PYG{+w}{  }\PYG{n}{hm}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{).}\PYG{n}{MarkerSize}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mi}{20}\PYG{p}{;}\PYG{+w}{                      }\PYG{c}{\PYGZpc{} ‘Pole’ Marker}
+\PYG{k}{end}
+\PYG{n}{sgrid}\PYG{p}{;}
+\PYG{n+nb}{legend}\PYG{p}{(}\PYG{n+nb}{cellstr}\PYG{p}{(}\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{Jl}\PYG{o}{\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZsq{}Jl=\PYGZpc{}.2d\PYGZsq{}}\PYG{p}{)));}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{off}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{} Corroboración de la estabilidad de las plantas con la función isstable():}
+\PYG{n}{isstable}\PYG{p}{(}\PYG{n}{Plantas}\PYG{p}{,}\PYG{l+s}{\PYGZsq{}elem\PYGZsq{}}\PYG{p}{)}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} DIAGRAMA DE BODE de la Planta a Lazo Abierto, respecto a la Entrada Manipulada:}
+\PYG{n+nb}{figure}\PYG{p}{(}\PYG{l+m+mi}{2}\PYG{p}{);}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{on}\PYG{p}{;}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{bode}\PYG{p}{(}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n+nb}{i}\PYG{p}{));}
+\PYG{k}{end}
+\PYG{n+nb}{grid}\PYG{p}{;}
+\PYG{n+nb}{legend}\PYG{p}{(}\PYG{n+nb}{cellstr}\PYG{p}{(}\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{Jl}\PYG{o}{\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZsq{}Jl=\PYGZpc{}.2d\PYGZsq{}}\PYG{p}{)));}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{off}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{} SENSIBILIDAD de la Planta, a Lazo Cerrado con realimentación unitaria, respecto a la Entrada Manipulada:}
+\PYG{n+nb}{figure}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{);}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{on}\PYG{p}{;}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n}{bode}\PYG{p}{(}\PYG{n}{feedback}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{n+nb}{i}\PYG{p}{)));}
+\PYG{k}{end}
+\PYG{n+nb}{grid}\PYG{p}{;}
+\PYG{n+nb}{legend}\PYG{p}{(}\PYG{n+nb}{cellstr}\PYG{p}{(}\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{Jl}\PYG{o}{\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{l+s}{\PYGZsq{}Jl=\PYGZpc{}.2d\PYGZsq{}}\PYG{p}{)));}
+\PYG{n}{hold}\PYG{+w}{ }\PYG{l+s}{off}\PYG{p}{;}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} CONTROLABILIDAD Y OBSERVABILIDAD}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{c}{\PYGZpc{}División de la matriz B en la matriz de entrada manipulada B\PYGZus{}va y de entrada de perturbación B\PYGZus{}Tl:}
+\PYG{+w}{  }\PYG{n}{B\PYGZus{}va}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{B}\PYG{p}{(:,}\PYG{l+m+mi}{1}\PYG{p}{);}\PYG{+w}{ }\PYG{c}{\PYGZpc{}En realidad todos los vectores B\PYGZus{}va(:,i) son iguales.}
+\PYG{+w}{  }\PYG{n}{B\PYGZus{}Tl}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{B}\PYG{p}{(:,}\PYG{l+m+mi}{2}\PYG{p}{);}
+\PYG{+w}{  }\PYG{c}{\PYGZpc{}Matrices de Controlabilidad y Observabilidad:}
+\PYG{+w}{  }\PYG{n}{Cont}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{B\PYGZus{}va}\PYG{+w}{ }\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{A}\PYG{o}{*}\PYG{n}{B\PYGZus{}va}\PYG{+w}{ }\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{A}\PYGZca{}\PYG{l+m+mi}{2}\PYG{o}{*}\PYG{n}{B\PYGZus{}va}\PYG{p}{];}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[B\PYGZus{}va , A*B\PYGZus{}va , A\PYGZca{}2*B\PYGZus{}va]}
+\PYG{+w}{  }\PYG{n}{Obs}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{C}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{C}\PYG{o}{*}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{A}\PYG{+w}{ }\PYG{p}{;}\PYG{+w}{ }\PYG{n}{C}\PYG{o}{*}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{A}\PYGZca{}\PYG{l+m+mi}{2}\PYG{p}{];}\PYG{+w}{ }\PYG{c}{\PYGZpc{}[C ; C*A ; C*A\PYGZca{}2]}
+\PYG{+w}{  }\PYG{c}{\PYGZpc{}Rango de las matrices de Controlabilidad y Observabilidad:}
+\PYG{+w}{  }\PYG{n+nb}{fprintf}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}Para Jl=\PYGZpc{}.2d: rank(Cont)=\PYGZpc{}d y rank(Obs)=\PYGZpc{}d\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Jl}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{),}\PYG{+w}{ }\PYG{n+nb}{rank}\PYG{p}{(}\PYG{n}{Cont}\PYG{p}{),}\PYG{+w}{ }\PYG{n+nb}{rank}\PYG{p}{(}\PYG{n}{Obs}\PYG{p}{));}
+\PYG{+w}{  }\PYG{n+nb}{fprintf}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}}\PYG{p}{);}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} GAIN SCHEDULING}
+\PYG{c}{\PYGZpc{}Ajuste de los parámetros de la familia de controladores I\PYGZhy{}PD:}
+\PYG{p}{[}\PYG{n}{ControladoresPID}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,:,:),}\PYG{n}{info}\PYG{p}{]}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{n}{pidtune}\PYG{p}{(}\PYG{n}{Plantas}\PYG{p}{(}\PYG{l+m+mi}{1}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{,:),}\PYG{l+s}{\PYGZsq{}I\PYGZhy{}PD\PYGZsq{}}\PYG{p}{,}\PYG{l+m+mi}{30}\PYG{p}{);}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{}ANÁLISIS de ESTABILIDAD del sistema controlador\PYGZhy{}planta:}
+\PYG{k}{for}\PYG{+w}{ }\PYG{n+nb}{i}\PYG{p}{=}\PYG{l+m+mi}{1}\PYG{p}{:}\PYG{n}{CantPuntosOp}
+\PYG{+w}{  }\PYG{n+nb}{fprintf}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}Info del controlador\PYGZhy{}planta Jl=\PYGZpc{}.2d:\PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n}{Jl}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{));}
+\PYG{+w}{  }\PYG{n+nb}{fprintf}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}}\PYG{p}{);}
+\PYG{+w}{  }\PYG{n+nb}{disp}\PYG{p}{([}\PYG{l+s}{\PYGZsq{}   Stable: \PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{info}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{Stable}\PYG{p}{)]);}
+\PYG{+w}{  }\PYG{n+nb}{disp}\PYG{p}{([}\PYG{l+s}{\PYGZsq{}   Crossover Frequency: \PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{info}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{CrossoverFrequency}\PYG{p}{)]);}
+\PYG{+w}{  }\PYG{n+nb}{disp}\PYG{p}{([}\PYG{l+s}{\PYGZsq{}   Phase Margin: \PYGZsq{}}\PYG{p}{,}\PYG{+w}{ }\PYG{n+nb}{num2str}\PYG{p}{(}\PYG{n}{info}\PYG{p}{(}\PYG{n+nb}{i}\PYG{p}{).}\PYG{n}{PhaseMargin}\PYG{p}{)]);}
+\PYG{+w}{  }\PYG{n+nb}{fprintf}\PYG{p}{(}\PYG{l+s}{\PYGZsq{}\PYGZbs{}n\PYGZsq{}}\PYG{p}{);}
+\PYG{k}{end}
+
+\PYG{c}{\PYGZpc{}\PYGZpc{} FILTRO DE KALMAN:}
+\PYG{c}{\PYGZpc{} Matriz de covarianza del ruido del proceso:}
+\PYG{n}{Rv}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{1e\PYGZhy{}3}\PYG{o}{*}\PYG{n+nb}{eye}\PYG{p}{(}\PYG{l+m+mi}{3}\PYG{p}{);}\PYG{+w}{ }\PYG{c}{\PYGZpc{}Q}
+
+\PYG{c}{\PYGZpc{} Matriz de covarianza del ruido de medición:}
+\PYG{n}{Rw}\PYG{+w}{ }\PYG{p}{=}\PYG{+w}{ }\PYG{l+m+mf}{2.89e\PYGZhy{}8}\PYG{p}{;}\PYG{+w}{ }\PYG{c}{\PYGZpc{}R}
+\end{Verbatim}

@@ -41,7 +41,7 @@ anchorcolor = blue]{hyperref} % for hyperlinks
 \author{Rodrigo Pérez \\ rodrigoperez2110@gmail.com \\ \\ Control y Sistemas, Facultad de Ingeniería, \\ Universidad Nacional de Cuyo, \\ Mendoza, Argentina}
 
 % Fecha
-\date{Febrero de 2024}
+\date{Marzo de 2024}
 
 % Cuerpo del documento
 % ======================================================================
@@ -68,19 +68,18 @@ anchorcolor = blue]{hyperref} % for hyperlinks
 % ======================================================================
 \begin{abstract}
     El presente documento presenta el proyecto final de la cátedra de Control y Sistemas de la Universidad Nacional de Cuyo.
-    El OBJETIVO del proyecto es aplicar los conocimientos, herramientas y habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de posición para el accionamiento electromecánico de la primer articulación del robot Universal UR10 figura \ref{fig:UR10-UNIVERSAL-ROBOT}, un robot industrial tipo serie de 6 grados de libertad.
+    El objetivo del es aplicar los conocimientos, herramientas y habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de posición para el accionamiento electromecánico de la primer articulación del robot Universal UR10 figura \ref{fig:UR10-UNIVERSAL-ROBOT}, un robot industrial tipo serie de 6 grados de libertad.
 
-    El robot se modela como un Sistema Lineal Variante en el Tiempo, en donde se toma al momento de inercia como un parámetro variable, y se utiliza un tipo de Controlador PID aplicado con la técnica de Gain Scheduling.
+    El robot se modela como un sistema lineal variante en el tiempo (LTI), en donde se toma al momento de inercia como un parámetro variable de entrada al modelo de la planta, y se utiliza un tipo de controlador PID junto con la técnica de planificación de ganancias (en inglés: gain scheduling) para lograr el correcto seguimiento de consignas y rechazo de perturbaciones.
 
-    Además, se incluye el modelado de un sensor ruidoso a la salida del sistema, se usa un filtro anti-aliasing y se propone un filtrado adicional con el objetivo de mitigar el ruido.
+    Además, se incluye ruido de proceso en las variables de estado de la planta, y el modelado de un encoder absoluto ruidoso a la salida del sistema. Y luego se utiliza el filtro de Kalman con el objetivo de mitigar el ruido y obtener la estimación más óptima posible de la posición angular de salida que se retroalimenta al controlador.
 
-    Luego, se valida el modelo mediante la comparación con otro modelo ("más realista") del sistema, el Modelo de Validación; el cual incluye las No Linealidades del robot, y en en el cual se utiliza un Controlador Discreto con Representación en Punto Fijo. El controlador se diseña en tiempo continuo, como se trabajó durante el cursado, pero en el modelo de validación, el bloque del controlador se implementa en tiempo discreto y punto fijo. ["Todo hecho en Simulink"].
+    Finalmente el controlador PID, junto con el sensor y el filtro de Kalman, son modelados en el tiempo discreto con representación en punto fijo.
 \end{abstract}
 
 
 % Secciones
 % ======================================================================
-
 
 \section{INTRODUCCIÓN}
 \label{sec:INTRODUCCIÓN}
@@ -95,8 +94,8 @@ Para controlar un sistema no lineal, con la estratagia de control PID, básicame
 \begin{itemize}
     \item 1) LINEALIZANDO EL SISTEMA: Si el sistema es no lineal pero está cerca de ser lineal, es decir si se pueden despreciar sus no linealizades, obteniendo un modelo que se corresponda con el real dentro de una tolerancia dada por la aplicación.
 
-    \item 2) UTILIZANDO PROGRAMACIÓN DE GANANCIAS (GAIN SCHEDULING): Ahora, si las no linealidas son demasiadas, una aproximación común es aplicar la estrategia llamada gain scheduling (programación de ganancia). En esta estrategia de control, básicamente primero se linealiza el sistema no lineal alrededor de diferentes puntos de operación, definidos de manera distribuida para todo el espectro en el que puede cambiar los parámetros y/o el comportamiento del sistema. Y luego, se crea una familia de controladores PID uno para cada punto, y se ajusta cada uno de ellos para que sea óptimo en su punto de operación. Finalmente, se hace que, de forma automática, el sistema de control alterne entre estos modelos lineales mientras se opera el sistema, de tal forma de tener el mejor control lineal en cada punto donde opere el robot.
-    Para un sistema que tiene un comportamiento diferente en distintas regiones operativas, (es decir, para un sistema no lineal), dicha estrategia de control será subóptima. Esta suboptimalidad puede ser tan leve que pase desapercibida, o podría ser lo suficientemente grave como para hacer que sea inviable aplicarlo al sistema real.
+    \item 2) UTILIZANDO PLANIFICACIÓN DE GANANCIAS (GAIN SCHEDULING): Ahora, si las no linealidas son demasiadas, una aproximación común es aplicar la estrategia llamada planificación de ganancias. En esta estrategia de control, básicamente primero se debe linealizar el sistema no lineal alrededor de diferentes puntos de operación, definidos de manera distribuida para todo el espectro en el que puede cambiar los parámetros y/o el comportamiento del sistema. Y luego, se crea una familia de controladores PID uno para cada punto, y se ajusta cada uno de ellos para que sea óptimo en su punto de operación. Finalmente, se hace que, de forma automática, el sistema de control alterne entre estos modelos lineales mientras se opera el sistema de tal forma de tener el mejor control lineal en cada punto donde se opere.
+    Para un sistema que tiene un comportamiento diferente en distintas regiones operativas, (es decir, para un sistema no lineal), dicha estrategia de control será subóptima. Esta suboptimalidad puede ser tan leve que pase desapercibida, o podría ser lo suficientemente grave como para hacer que sea inviable aplicarlo al sistema real, por lo que se evaluará su optimalidad.
 \end{itemize}
 
 Como un robot serie posea grandes no linealidades, en el proyecto se aplicará la estrategía de gain scheduling.
@@ -135,7 +134,7 @@ Para realizar cálculos cinemáticos directos e inversos de los robots, utiliza 
     \label{fig:Software CoppeliaSim}
 \end{figure}
 
-CoppeliaSim está construido alrededor de una arquitectura de control distribuido que utiliza scripts en Python y Lua, o complementos (en inglés: plug-ins) en C/C++ que actúan como controladores individuales y síncronos. Controladores asincrónicos adicionales pueden ejecutarse en otro proceso, hilo o máquina a través de diversas soluciones de middleware (ROS, API remota, ZeroMQ) con lenguajes de programación como C/C++, Python, Java y Matlab.
+CoppeliaSim está construido alrededor de una arquitectura de control distribuido que utiliza scripts en Python y Lua, o complementos (en inglés: plug-ins) en C/C++ que actúan como controladores individuales y síncronos. Controladores asincrónicos adicionales pueden ejecutarse en otro proceso, hilo o máquina a través de diversas soluciones de middleware (ROS, API remota, ZeroMQ) con lenguajes de programación como C/C++, Python, Java y MATLAB.
 
 
 \subparagraph{Vinculación De Coppeliasim Con MATLAB/Simulink:}
@@ -192,9 +191,9 @@ Para ello, en Simulink se necesitó hacer uso de una Función S de MATLAB de niv
 
 El robot serie UR10, fabricado por la empresa danesa llamada: Universal Robots, posee una capacidad de carga de 10 kg, un alcance de 1300 mm, y brinda una repetibilidad de 0,1 mm. El UR10 es capaz de realizar una gran variedad de tareas que incluyen: paletización robótica, ensamblaje robótico, recogida y colocación automatizadas, manipulación de máquinas y embalaje, entre otras.
 
-Además, es un robot del tipo Colaborativo, lo que significa que puede operar junto a los trabajadores sin necesidad de barreras de seguridad. Sus características de seguridad incluyen sensores de fuerza que previenen colisiones con los trabajadores.
+Además, es un robot del tipo Colaborativo, lo que significa que puede operar junto a los trabajadores sin necesidad de barreras de seguridad. Sus características de seguridad incluyen sensores de fuerza/par que previenen colisiones con los trabajadores.
 
-Por otro lado, tiene la capacidad de ser programado por enseñanza, mediante su manipulación física de forma manual. Cabe mencionar que existe una versión mejorada el UR10, llamada UR10e, en donde la única diferencia es que la versión mejorada posee los sensores de fuerza/par incorporados, una precisión mejorada y una interfaz mucho mejor.
+Por otro lado, tiene la capacidad de ser programado por enseñanza, mediante su manipulación física de forma manual. Cabe mencionar que existe una versión mejorada el UR10, llamada UR10e, en donde la única diferencia es que la versión mejorada posee los sensores de fuerza/par incorporados, mayor precisión y una mejor interfaz.
 
 \paragraph{ESPECIFICACIONES TÉCNICAS DEL ROBOT}
 \label{sec:ESPECIFICACIONES TÉCNICAS DEL ROBOT}
@@ -256,7 +255,7 @@ Eslabón 6 & 0.00040 & 0.00041 & 0.00034 & 0.00000 & 0.00000  & 0.00000 & 3er Ma
 \subparagraph{Centro De Masa De Cada Eslabón:}
 \label{sec:Centro De Masa De Cada Eslabón:}
 \hfill \break
-La tabla \ref{table:Centro De Masa De Cada Eslabón}, muestra la pocisión, en metros, de los centros de masa (CM) de cada eslabón, los cuales serán útiles a la hora de calcular el momento de inercia de la primer articulación del robot. Como se explica en la sección \ref{sec:Cálculo Del Momento De Inercia Equivalente:}, las coordenadas de dichas posiciones se encuentran referenciadas a la trama móvil de cada eslabón. Dichos valores de coordenadas fueron obtenidos de la simulación en CoppeliaSim.
+La tabla \ref{table:Centro De Masa De Cada Eslabón}, muestra la posición, en metros, de los centros de masa (CM) de cada eslabón, los cuales serán útiles a la hora de calcular el momento de inercia de la primer articulación del robot. Como se explica en la sección \ref{sec:Cálculo Del Momento De Inercia Equivalente:}, las coordenadas de dichas posiciones se encuentran referenciadas a la trama móvil de cada eslabón. Dichos valores de coordenadas fueron obtenidos de la simulación en CoppeliaSim.
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{l|lll|lll|l}
@@ -290,7 +289,7 @@ La tabla \ref{table:Límites Articulares, Velocidades Angulares Máximas y Torqu
 \subparagraph{Máximos Torques De Las Articulaciones:}
 \label{sec:Máximos Torques De Las Articulaciones:}
 \hfill \break
-La tabla \ref{table:Límites Articulares, Velocidades Angulares Máximas y Torques Máximos de las articulaciones}, también muestra muestra los máximos torques que el robot podría entregar en la aplicación, los cuales fueron obtenidos de la página web de Universal Robots \cite{Torques_Máximos}. Dichos torques corresponden a la poscición articular más desfavorable, es decir la que máyor torque requiera, y con la máxima carga de 10 kg. Particularmente, nos interesa solo el máximo torque de la articulación base.
+La tabla \ref{table:Límites Articulares, Velocidades Angulares Máximas y Torques Máximos de las articulaciones}, también muestra muestra los máximos torques que el robot podría entregar en la aplicación, los cuales fueron obtenidos de la página web de Universal Robots \cite{Torques_Máximos}. Dichos torques corresponden a la posición articular más desfavorable, es decir la que máyor torque requiera, y con la máxima carga de 10 kg. Particularmente, nos interesa solo el máximo torque de la articulación base.
 
 \begin{table}[H]
     \centering
@@ -320,7 +319,7 @@ La tabla \ref{table:Límites Articulares, Velocidades Angulares Máximas y Torqu
 
 Las aplicaciones de los robots serie, implican que estos muevan dos o más de sus articulaciones simultáneamente, mediante un Método de Control Multiarticular. Pero, en tal caso se tiene un sistema de múltiples entradas y múltiples salidas (MIMO) con 6 variables de entrada y 6 de salida, y para utilizar un control de tipo PID como se propuso en la introducción, entonces se tendría que poder realizar el tunning de los parámetros a 6 Controladores PID, uno por cada articulación.
 
-Esto resulta prácticamente inviable, ya que al lograr tunear un primer PID correspondiente a una de las variables, y comenzar a tunear otro, hay que volver a tunear el primero. Esto es, ya que una variable influencia en la respuesta de la otra variable, debido al que existe un acoplamiento entre las mismas. Entonces se tendría que estar modificando permanentemente ambos PIDs, hasta que en algún momento funcione todo bien y no se sigan modificando.
+Esto resulta prácticamente inviable, ya que al lograr tunear un primer PID correspondiente a una de las variables, y comenzar a tunear otro, hay que volver a tunear el primero. Esto es, ya que una variable influencia en la respuesta de la otra variable, debido al que existe un acoplamiento entre las mismas. Entonces se tendría que estar modificando permanentemente ambos controladores PID, hasta que en algún momento funcione todo bien y no se sigan modificando.
 
 Y si tunear dos Controladoes PID es complicado, tunear 6 Controladores PID resulta prácticamente imposible, ya que al modificar los parámetros de uno, se deben modificar los parámetros de los otros 5, hasta lograr cumplir con los objetivos de control.
 Por este motivo, no sería factible utilizar el control PID, sino que se necesitaría hacer uso de otra técnica de control, como una técnica de control no lineal con realimentación completa del vector de estados.
@@ -344,8 +343,17 @@ Como otra simplificación, y debido a las características de sus materiales, se
 
 \hfill
 
-El subsistema térmico de la planta no puede ser despreciado debido a la relativamente alta potencia que requiere el robot, ya que se podría tener repercusiones importantes en el desempeño y seguridad de la planta real. Pero se ha decidido no considerarlo en principio, por no ser demasiado relavante en los objetivos del proyecto, y para así poder dedicarle más tiempo a otros temas más relevantes del mismo.
+El subsistema térmico de la planta no debería ser despreciado debido a la relativamente alta potencia que requiere el robot, ya que se podría tener repercusiones importantes en el desempeño y seguridad de la planta real. Pero se ha decidido no considerarlo en principio, por no ser demasiado relavante en los objetivos del proyecto, y para así poder dedicarle más tiempo a otros temas más relevantes del mismo.
 
+\paragraph{Cantidad de Sensores}
+\label{sec:Cantidad de Sensores}
+\hfill
+
+\hfill
+
+Al tratarse de un robot colaborativo, como seguridad ante colisiones de cualquier tipo, estos poseen sensores de fuerza/par. Además, como los cobots trabajan junto a humanos, necesitan de una retroalimentación de doble encoder para aumentar la detección de fuerza y monitorear la consistencia, suavidad, y precisión.
+%  Doble-Encoder. URL: %https://www.youtube.com/watch?v=EaaSNB8vfKU&t=87s.
+Pero en el proyecto toma la simplificación de considerar solo un sensor de posición absoluta para la articulación controlada.
 
 % \paragraph{Modulador De Tensión}
 % \label{sec:Modulador De Tensión}
@@ -528,7 +536,7 @@ Cabe mencionar que la entrada de los parámetros de las masas, coordenadas de lo
 
 Así, se ha logrado obtener el Momento de Inercia Equivalente Variable $J_Z$, el cual se brinda como salida de la función S de MATLAB de nivel 2, tal y como se puede apreciar en la figura \ref{fig:Movimiento del robot en CoppeliaSim, mediante panel en Simulink}.
 
-Particularmente, se obtuvo el valor máximo y mínimo del $J_Z$, dado que serán de utilidad a la hora de aplicar el método de control de programación de ganancias. Dichos valores extremos se dan para las posiciones articulares mostradas en las figuras \ref{fig:Máximo Momento de Inercia} y \ref{fig:Mínimo Momento de Inercia}, y son los mostrados en las igualdades \ref{eq:J_Z_máx y J_Z_mín}:
+Particularmente, se obtuvo el valor máximo y mínimo del $J_Z$, dado que serán de utilidad a la hora de aplicar el método de control de planificación de ganancias. Dichos valores extremos se dan para las posiciones articulares mostradas en las figuras \ref{fig:Máximo Momento de Inercia} y \ref{fig:Mínimo Momento de Inercia}, y son los mostrados en las igualdades \ref{eq:J_Z_máx y J_Z_mín}:
 
 \begin{subequations} \label{eq:J_Z_máx y J_Z_mín}
 	\begin{align}
@@ -629,7 +637,7 @@ La caja reductora de cada una de las seis articulaciones del brazo robótico cor
 \end{figure}
 
 Estas unidades se caracterizan por tener altas relaciones de transmisión, lo que las hace compactas y livianas, y por tener cero juego “backlash” entre los engranajes, lo que las hace muy precisas.
-Por no tener “backlash”, y debido a la alta presición que maneja el robot, y a la simplificación \ref{sec:Sin Deformaciones Elásticas} de considerarlo sin deformaciones elásticas, entonces se considera al reductor armónico como un acoplamiento rígido sin elasticidad torsional. Por lo tanto, su modelo se lo puede expresar con un único grado de libertad:
+Por no tener “backlash”, y debido a la alta precisión que maneja el robot, y a la simplificación \ref{sec:Sin Deformaciones Elásticas} de considerarlo sin deformaciones elásticas, entonces se considera al reductor armónico como un acoplamiento rígido sin elasticidad torsional. Por lo tanto, su modelo se lo puede expresar con un único grado de libertad:
 
 \begin{subequations} \label{eq:theta_l, omega_l y T_q}
     \begin{align}
@@ -673,22 +681,14 @@ La información exacta acerca del tipo de motor utilizado en cada articulación 
 Para el desarrollo del proyecto, se considera que el UR10 posee en sus articulaciones motores de corriente continua (CC). Si bien las versiones mejoradas del robot como la versión UR10e, probablemente posee motores síncronos de imánes permanentes (PMSM), debido a que los PMSM brindan mayor torque y eficiencia a costa de un mayor precio y complejidad en el algoritmo de control, se escoge al motor de CC debido a que este cuenta con un sistema de posicionamiento angular que comúnmente se controla mediante algoritmos de control PID para optimizar su funcionamiento \cite{arenas2023virtual}.
 
 La selección del motor específico se basa en los requerimientos del robot, como se muestra a continuación:
-Para un diámetro disponible para el motor de aproximadamente 100 mm, para un $T_{l_{\text{máx.}}}(t)=360 Nm$, una $\omega_{l_{\text{máx.}}}(t)=120\text{°/s}=20 rpm$, y teniendo en cuenta la curva de torque-velocidad del motor, y otros parámetros tales como la relativamente alta precisión y repitibilidad necesaria, se seleccionó el Motor C42-L50 10, de la serie C23, de la empresa Moog inc, el cual posee escobillas e imanes permanentes. Las especificaciones técnicas del motor se encuentran en \cite{MoogMotorDatasheet}.
-% La selección del motor específico se basa en los requerimientos del robot, como se muestra a continuación:
-% Para un diámetro disponible para el motor de aproximadamente 100 mm, para un $T_{l_{\text{máx.}}}(t)=360 Nm$, una $\omega_{l_{\text{máx.}}}(t)=120\text{°/s}=20 rpm$, y teniendo en cuenta la curva de torque-velocidad del motor, y otros parámetros tales como la relativamente alta precisión y repitibilidad necesaria, se seleccionó el Motor 025-A OP(N/H)-100-025-A, de la serie Omni+, de la empresa Celera Motion \cite{Celera_Motion}. En las figuras \ref{fig:Página 9 de la hoja de datos del motor} y  se pueden observar las especificaciones técnicas del motor brindadas por su hoja de datos.
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\textwidth]{Página 9 de la hoja de datos del motor}
-%     \caption{Página 9 de la hoja de datos del motor.}
-%     \label{fig:Página 9 de la hoja de datos del motor}
-% \end{figure}
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\textwidth]{Páginas 10 y 11 de la hoja de datos del motor}
-%     \caption{Páginas 10 y 11 de la hoja de datos del motor.}
-%     \label{fig:Páginas 10 y 11 de la hoja de datos del motor}
-% \end{figure}
+Para un diámetro disponible para el motor de aproximadamente 100 mm, para un $T_{l_{\text{máx.}}}=330 ~Nm \Rightarrow T_{m_{\text{máx.}}}=T_{l_{\text{máx.}}}/r=2,25 ~Nm$, una $\omega_{l_{\text{máx.}}}=120\text{°/s}=2,094\text{ rad/s}=20\text{  rpm} \Rightarrow \omega_{m_{\text{máx.}}}=\omega_{l_{\text{máx.}}}.r=3200\text{  rpm}$, y teniendo en cuenta la curva de torque-velocidad del motor, y otros parámetros tales como la relativamente alta precisión y repitibilidad necesaria, se seleccionó el Motor C42-L50 10, de la serie C23, de la empresa Moog inc, el cual posee escobillas e imanes permanentes. Las especificaciones técnicas del motor se encuentran en \cite{MoogMotorDatasheet}, y se muestran a continuación:
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Datos Datasheet Motor Brushed}
+    \caption{Datos Datasheet Motor Brushed.}
+    \label{fig:Datos Datasheet Motor Brushed}
+\end{figure}
 
 
 
@@ -1020,7 +1020,7 @@ Siendo para el motor seleccionado \cite{MoogMotorDatasheet}:
 
 Donde $K_E=K_T$ siempre que el flujo de campo permanezca constante (como es el caso), y siempre que obviamente dichas constantes y todos los parámetros se expresen en el mismo sistema de unidades (sistema internacional de unidades).
 
-En resumen, el subsistema electromagnético se encuentra dado por la ecuación \ref{eq:v_a}, la cual al despejar la derivada en el tiempo de la variable de estado $i_a$, se obtiene la ecuación de estado del subsistema electromagnético \ref{eq:subsistema electromagnético}. 
+En resumen, el subsistema electromagnético se encuentra dado por la ecuación \ref{eq:v_a}, la cual al despejar la derivada en el tiempo de la variable de estado $i_a$, se obtiene la ecuación de estado del subsistema electromagnético \ref{eq:subsistema electromagnético}.
 
 \begin{align}   \label{eq:subsistema electromagnético}
     \frac{di_a}{dt}=\frac{v_a-R_a.i_a-e}{L_a}
@@ -1103,7 +1103,7 @@ Se observa en las ecuaciones escalares, que se trata de un sistema de tercer ord
 En donde, el vector de entradas $u(t)$ se conforma de una entrada que se puede manipular $(v_a)$ y otra entrada que representa las perturbaciones $(T_L)$.
 
 
-De esta forma, quedan definidas las matrices A,B,C y D del modelo del sistema \ref{eq:modelo completo de la planta en forma matricial}, el cual se da en concordancia con un sistema matricial lineal (de primer orden) de parámetros variables (LPV), con el parámetro variable $J_{eq}(t)$:
+De esta forma, quedan definidas las matrices A,B,C y D del modelo del sistema \ref{eq:modelo completo de la planta en forma matricial}, el cual se da en concordancia con un sistema matricial lineal de parámetros variables (LPV), con el único parámetro variable $J_{eq}(t)$:
 
 \begin{align} \label{eq:sistema lineal de parámetros variables en el tiempo LPV}
     \begin{cases}
@@ -1128,7 +1128,7 @@ A continuación se muestra el diagrama en bloques que representa al modelo compl
 \subsection{ANÁLISIS DEL MODELO DE LA PLANTA}
 \label{sec:ANÁLISIS DEL MODELO DE LA PLANTA}
 
-Antes de realizar el diseño del controlador, se procede a verificar el modelo matemático completo de la planta, analizando su estabilidad, controlabilidad y observabilidad.
+Antes de realizar el diseño del controlador, y la validación del modelo completo de la planta, se procede a verificar dicho modelo matemático, analizando su estabilidad, controlabilidad y observabilidad.
 
 \subsubsection{ESTABILIDAD Y AMORTIGUAMIENTO DE LA PLANTA}
 \label{sec:ESTABILIDAD Y AMORTIGUAMIENTO DE LA PLANTA}
@@ -1243,26 +1243,38 @@ Entonces se pueden igualar los términos de ambas expresiones, de donde se obtie
     \zeta=\frac{R_a.J_{eq}+L_a.b_{eq}}{L_a.J_{eq}\text{.2}.\omega_n}
 \end{align}
 
-Particularmente, al tratarse de un sistema LPV, el análisis del modelo debe realizar para varios valores del parámetro variable $J_{eq}(t)$, para así tener una mayor certeza de que el sistema se comporte como se espera, en todos sus puntos de operación. Entonces se procede a tomar 4 valores de $J_{eq}(t)$, igualmente separados por un paso igual a:
+Particularmente, al tratarse de un sistema LPV, el análisis del modelo debe realizarse para varios valores del parámetro variable $J_{eq}(t)$, para así tener una mayor certeza de que el sistema se comporte como se espera, en todos sus puntos de operación. Entonces se procede a tomar 4 valores de $J_l(t)$, igualmente separados por un paso igual a:
 
-\begin{align} \label{eq:Paso para la selección de los valores del parámetro variable J_eq(t)}
-    \frac{J_{eq_{\text{máx.}}}-J_{eq_{\text{mín.}}}}{4}=1,56 ~[kg.m^2]
+\begin{align} \label{eq:Paso para la selección de los valores del parámetro variable J_l(t)}
+    \frac{J_{l_{\text{máx.}}}-J_{l_{\text{mín.}}}}{4}=3,99238 ~[kg.m^2]
 \end{align}
 
-En la tabla \ref{table:Valores de omega_n y zeta, eligiendo 4 valores para J_eq}, se muestran los valores de $\omega_n$ y $\zeta$ para los distintos valores elegidos del parámetro variable $J_{eq}(t)$.
+Paso con el que se obtienen los siguientes 4 valores para $J_l$:
+
+\begin{align} \label{eq:Valores elegidos de Jl}
+    J_l=\left[0,57\ ;\ 4,56\ ;\ 8,55\ ;\ 12,5\right] ~[kg.m^2]
+\end{align}
+
+Y utilizando la ecuación \ref{eq:J_eq}, se obtienen los correspondientes 4 valores para $J_{eq}(t)$:
+
+\begin{align} \label{eq:Valores correspondientes de Jeq}
+    J_{eq}=\left[6,58\times{10}^{-4};8,14\times{10}^{-4};9,78\times{10}^{-4};11,3\times{10}^{-4}\right] ~[kg.m^2]
+\end{align}
+
+En la tabla \ref{table:Valores de omega_n y zeta, eligiendo 4 valores para Jl}, se muestran los valores de $\omega_n$ y $\zeta$ para los distintos valores elegidos del parámetro variable $J_l(t)$.
 
 \begin{table}[H]
     \centering
     \begin{tabular}{|l|llll|}
     \cline{1-5}
-    \textbf{$J_{eq}$}   & 6,58$\times10^{-4}$ & 8,14$\times10^{-4}$  & 9,70$\times10^{-4}$  & 11,26$\times10^{-4}$ \\ \cline{1-5}
-    \textbf{$\omega_n$} & 153,657             & 138,1508             & 126,5552             & 117,4618             \\ \cline{1-5}
-    \textbf{$\zeta$}    & 1,754               & 1,9505               & 2,1289               & 2,2935               \\ \cline{1-5}
+    \textbf{$J_l ~[kg.m^2]$}     &   0,57  &   4,56   &   8,55   &  12,5    \\ \cline{1-5}
+    \textbf{$\omega_n ~[rad/s]$} & 153,657 & 138,1508 & 126,5552 & 117,4618 \\ \cline{1-5}
+    \textbf{$\zeta$}             &   1,754 &   1,9505 &   2,1289 &   2,2935 \\ \cline{1-5}
     \end{tabular}
-    \caption{\label{table:Valores de omega_n y zeta, eligiendo 4 valores para J_eq}Valores de $\omega_n$ y $\zeta$, eligiendo 4 valores para $J_{eq}$.}
+    \caption{\label{table:Valores de omega_n y zeta, eligiendo 4 valores para Jl}Valores de $\omega_n$ y $\zeta$, eligiendo 4 valores para $J_l$.}
 \end{table}
 
-Como se observa, el factor de amortiguamiento es siempre mayor a la unidad, lo que significa que el sistema es sobreamortiguado. Esto se cumple para todos los valores de $J_{eq}$ considerados.
+Como se observa, el factor de amortiguamiento es siempre mayor a la unidad, lo que significa que el sistema es sobreamortiguado. Esto se cumple para todos los valores de $J_l$ considerados.
 
 
 \paragraph{Mapa De Polos Y Ceros de la Planta:}
@@ -1277,17 +1289,17 @@ Mediante la función: solve(eqn,var) de MATLAB, se calcula la variable S para el
     \centering
     \begin{tabular}{|l|llll|}
     \cline{1-5}
-    \textbf{$J_{eq}$} & 6,58$\times10^{-4}$ & 8,14$\times10^{-4}$  & 9,70$\times10^{-4}$  & 11,26$\times10^{-4}$ \\ \cline{1-5}
-    \textbf{$S_1$}    &    0                &    0                 &    0                 &    0                 \\ \cline{1-5}
-    \textbf{$S_2$}    & -490,9              & -500,8               & -507,3               & -511,8               \\ \cline{1-5}
-    \textbf{$S_3$}    &  -48,1              &  -38,1               &  -31,6               &  -27,0               \\ \cline{1-5}
+    \textbf{$J_l ~[kg.m^2]$}    &    0,57 &    4,56 &    8,55  &   12,5  \\ \cline{1-5}
+    \textbf{$S_1$}              &    0    &    0    &    0     &    0    \\ \cline{1-5}
+    \textbf{$S_2$}              & -490,9  & -500,8  & -507,3   & -511,8  \\ \cline{1-5}
+    \textbf{$S_3$}              &  -48,1  &  -38,1  &  -31,6   &  -27,0  \\ \cline{1-5}
     \end{tabular}
-    \caption{\label{table:Polos del sistema para los 4 valores de Jeq elegidos}Polos del sistema para los 4 valores de $J_{eq}$ elegidos.}
+    \caption{\label{table:Polos del sistema para los 4 valores de Jl elegidos}Polos del sistema para los 4 valores de $J_l$ elegidos.}
 \end{table}
 
 En donde, al no haber ningún polo positivo, se corrobora que se trata de un sistema estable.
 
-Luego, utilizando la función de MATLAB: pzmap(sys), se gráfican los polos y ceros de la planta en el plano complejo, de su función de tranfrerencia respecto a la entrada manipulada $v_a$, para cada uno de los valores de $J_{eq}$ elegidos, como se muestra a continuación:
+Luego, utilizando la función de MATLAB: pzmap(sys), se gráfican los polos y ceros de la planta en el plano complejo, de su función de tranfrerencia respecto a la entrada manipulada $v_a$, para cada uno de los valores de $J_l$ elegidos, como se muestra a continuación:
 
 \begin{figure}[H]
     \centering
@@ -1304,7 +1316,7 @@ En donde, se observa la ausencia de ceros de la planta al tratarse de un polinom
 
 \hfill
 
-Además, utilizando la función de MATLAB: bode(sys), se gráfican los diagramas de Bode, de la función de transferencia de la planta respecto a la entrada manipulada $v_a$, para cada uno de los valores de $J_{eq}$ elegidos, como se muestra a continuación:
+Además, utilizando la función de MATLAB: bode(sys), se gráfican los diagramas de Bode, de la función de transferencia de la planta respecto a la entrada manipulada $v_a$, para cada uno de los valores de $J_l$ elegidos, como se muestra a continuación:
 
 \begin{figure}[H]
     \centering
@@ -1315,7 +1327,7 @@ Además, utilizando la función de MATLAB: bode(sys), se gráfican los diagramas
 
 En donde se observa los valores de \textbf{Margen de ganancia Mg} y \textbf{Margen de fase Mf} posee la planta. Los cuales dicen respectivamente cuanto aumento solo en la ganancia, y cuanto aumento solo en la fase, puede absorber el sistema sin volverse inestable. Y al ser relativamente grandes dichos valores obtenidos, se puede decir, aunque sin asegurarlo, que es sistema es lo suficientemente robusto.
 
-Y para asegurar que la planta es realmente robusta, se obtiene el valor de su \textbf{sensibilidad Ms}. La sensivilidad dice cómo las variaciones en los parámetros de la planta, afectan a su función de transferencia en lazo cerrado (con realimentación unitaria). En general, se busca que la sensibilidad sea lo suficientemente alta (típicamente $Ms>0,01$) para detectar cambios significativos en la entrada y generar una respuesta adecuada, pero no tan alta (típicamente $Ms<1,3$ o $Ms<2$) como para generar fácilmente inestabilidades en el sistema. A continuación, se muestra el diagrama de Bode de la sensibilidad a lazo cerrado con realimentación unitaria para los distintos valores de $J_{eq}$:
+Y para asegurar que la planta es realmente robusta, se obtiene el valor de su \textbf{sensibilidad Ms}. La sensivilidad dice cómo las variaciones en los parámetros de la planta, afectan a su función de transferencia en lazo cerrado (con realimentación unitaria). En general, se busca que la sensibilidad sea lo suficientemente alta (típicamente $Ms>0,01$) para detectar cambios significativos en la entrada y generar una respuesta adecuada, pero no tan alta (típicamente $Ms<1,3$ o $Ms<2$) como para generar fácilmente inestabilidades en el sistema. A continuación, se muestra el diagrama de Bode de la sensibilidad a lazo cerrado con realimentación unitaria para los distintos valores de $J_l$:
 
 \begin{figure}[H]
     \centering
@@ -1324,23 +1336,21 @@ Y para asegurar que la planta es realmente robusta, se obtiene el valor de su \t
     \label{fig:Diagrama de Bode de la Sensibilidad a lazo cerrado con realimentación unitaria}
 \end{figure}
 
-De donde se puede obserbar un valor pico en la magnitud de la sensibilidad de 1,09 dB para $J_{eq}=11,3\times10^{-4}$ y de 0,922 dB para $J_{eq}=6,58\times10^{-4}$. Valores que al convertirlos desde los decibeles, dan lugar a los valores de sensibilidad:
+De donde se puede obserbar un valor pico en la magnitud de la sensibilidad de 1,09 dB para $J_l=12,5 ~[kg.m^2]$ y de 0,922 dB para $J_l=0,57 ~[kg.m^2]$. Valores que al convertirlos desde los decibeles, dan lugar a los valores de sensibilidad:
 
 \begin{subequations} \label{eq:Valores de Sensibilidad}
 	\begin{align}
-        Ms=10^{\frac{1,09 ~\text{dB}}{20}}=1,13 ~~~(\text{para:}~ J_{eq}=11,3\times10^{-4})
+        Ms=10^{\frac{1,09 ~\text{dB}}{20}}=1,13 ~~~(\text{para:}~ J_l=12,5 ~[kg.m^2])
         \\
-        Ms=10^{\frac{0,922 ~\text{dB}}{20}}=1,11 ~~~(\text{para:}~ J_{eq}=6,58\times10^{-4})
+        Ms=10^{\frac{0,922 ~\text{dB}}{20}}=1,11 ~~~(\text{para:}~ J_l=0,57 ~[kg.m^2])
 	\end{align}
 \end{subequations}
 
 Valores que se encuentran dentro de los valores de sensibilidad típicos, lo que confirma que la planta es robusta.
 
 
-
-
-\subsubsection{RESPUESTA}
-\label{sec:RESPUESTA}
+\subsubsection{RESPUESTA DE LA PLANTA A LAZO ABIERTO}
+\label{sec:RESPUESTA DE LA PLANTA A LAZO ABIERTO}
 
 A continuación, utilizando Simulink se obtiene la respuesta en la posición $\theta_l$, velocidad $\omega_l$ y corriente $i_a$ de la planta, ante una entrada escalón de $v_a=48$ V aplicada a los 0,1 s, y una entrada escalón de $T_l=330$ N.m aplicada a los 0,5 s.
 
@@ -1366,7 +1376,32 @@ A continuación, utilizando Simulink se obtiene la respuesta en la posición $\t
 \end{figure}
 
 Las gráficas dejan en evidencia que el sistema no oscila en su respuesta a las variaciones repentinas de las entradas.
-En el caso de la corriente, en \ref{fig:Respuesta en la corriente armadura de la planta ante un escalón de va y de Tl} se observa un pico de unos 60 A (61,3 A para el peor caso correspondiente al $J_{eq_{\text{máx.}}})$), y luego una corriente constante ante la respuesta escalón a la máxima carga $T_l$, igual a 15,4 A. Cuando la Corriente Nominal del motor es de solo 5,3 A. De esta forma se concluye que el sistema a lazo abierto requiere de una metodología de control, para mantener el valor de la variable interna $i_a(t)$ dentro de los rangos de seguridad del dispositivo.
+En el caso de la corriente, en \ref{fig:Respuesta en la corriente armadura de la planta ante un escalón de va y de Tl} se observa un pico de unos 60 A (61,3 A para el peor caso correspondiente al $J_{l_{\text{máx.}}})$), y también se observa una corriente constante ante la respuesta escalón a la máxima carga $T_l$, igual a 15,4 A, cuando la corriente nominal del motor es de solo 5,3 A.
+% Por otro lado, se observa que la perturbación obviamente cambia el valor final de la posición angular, y lo hace en 25°.
+% De esta forma se concluye que el sistema a lazo abierto requiere de una metodología de control, para mantener el valor de la variable interna $i_a(t)$ dentro de los rangos de seguridad del dispositivo.
+
+\subsubsection{VALIDACIÓN DE LA PLANTA}
+\label{sec:VALIDACIÓN DE LA PLANTA}
+
+La validación es el proceso de determinar el grado de precisión con el que el modelo representa al mundo real, desde la perspectiva de los usos previstos del modelo.
+
+Se procede validar el sistema desarrollado. A falta de disponer físicamente del robot, la validación del modelo propuesto de la planta a controlar se realizaría comparándolo con un modelo matemático más cercano a la realidad, elaborado teniendo en cuenta las no linealidades del robot.
+
+Se tiene que el \textbf{modelo de diseño (de la planta)} obtenido, es ul conjunto de modelos lineales que se obtienen para distintos valores a elección del parámetro variable $J_l=J_Z$.
+
+Y se tiene que el \textbf{modelo de validación (de la planta)}, sería un único modelo que incluiría todas las no linealidades del robot. Pero en realidad este modelo no lineal terminaría siendo lo mismo que el modelo lineal, porque:
+
+\textbf{1) No se necesita considerar el modelado de vibraciones producidas en las articulaciones del robot por el movimiento de la primera articulación, ya que:}
+
+- Las articulaciones que más influirían serían las del hombro y el codo, por sostener a los eslabónes más largos, pero los ejes de giro de estás son siempre perpendiculares al eje Z de giro de la articulación base.
+
+- Los motores vienen incluidos con un freno, que solo se activan siempre que la articulación del robot deja de moverse (como el freno de mano de un auto), el cual impide completamente el movimiento relativo entre los eslabones.  %(Referencia: AKM2G-KM_SG_000315_RevB_EN-mobile).
+
+Y por otro lado, tambpoco se necesita considerar la modelización de las vibraciones producidas en los eslabones del robot, ya que los materiales de los mismos poseen alta rigudez, y no generar vibraciones estructurales importantes.
+
+\textbf{2) Para incluir la no linealidad del momento de inercia variable, simplemente se debería reemplazar la variable $J_l=J_Z$ por su ecuación en función de las posiciones articulares. Pero hacerlo no tiene sentido, ya que debido a la misma consideración de movimiento monoarticular, dicha variable $J_l=J_Z$ termina siendo solo una constante para cada posición articular dada, tal y como se encuentra ya modelada la planta}
+
+
 
 
 \subsubsection{CONTROLABILIDAD Y OBSERVABILIDAD}
@@ -1409,7 +1444,7 @@ Entonces, al ser la planta de tercer order, se remplaza en \ref{eq:Matrices de C
 Que el sistema sea controlable, indica que existe alguna ley de control que permite ubicar (es decir, modificar) todos los polos del sistema. Lo cual es necesario saber antes de comenzar con el diseño del controlador.
 Y, por otro lado, que el sistema sea observable, indica que todos los estados del sistema afectan a al salida, por lo tanto es posible estimar todo el vector de estado con un observador. Lo cual es necesario saber antes de comenzar con el diseño de un observador de estados.
 
-Según la matirz C del sistema utilizada, la observabilidad calculada, es considerando que se mide la poscición angular de la articulación.
+Según la matirz C del sistema utilizada, la observabilidad calculada, es considerando que se mide la posición angular de la articulación.
 Ahora, si se calcula la observabilidad considerando que se mide solo la velocidad angular, mediante la matriz $C=[0, 1, 0]$, se obtiene un rango de 2, lo que indica que para tal caso la planta no es observable. Y lo mismo ocurre si solo se midiera la corriente de armadura, al tomar a $C=[0, 0, 1]$, es decir, el sistema tampoco se puede observar desde la corriente.
 
 
@@ -1420,73 +1455,172 @@ Ahora, si se calcula la observabilidad considerando que se mide solo la velocida
 \subsubsection{CONTROLADOR PID}
 \label{sec:CONTROLADOR PID}
 
-[[[[El sistema de control está conformado por: una planta electromecánica, un controlador junto con la implementación de un observador de estados, un sensor de posición angular (encoder) y un filtro. Y el objetivo de dicho control será que el robot logre moverse sin oscilaciones, de una manera rápida y precisa, logrando brindar estabilidad y un correcto seguimiento de consignas.]]]]
-
-El controlador que se propone es un controlador I-PD, con la idea de evitar los posibles problemas de amplificación de la señal de referencia que provocan la parte proporcional y derivativa, es decir, para evitar el Set-Point Kick. Esto se logra al colocar la ganancia proporcional y el bloque derivativo directamente en el lazo de realimentación, separados de la señal de referencia, como se muestra en la figura \ref{fig:Diagrama en bloques del Control (sin observador)}:
+El controlador que se propone es un controlador I-PD, con la idea de evitar problemas de amplificación de la señal de referencia que provocan la parte proporcional y derivativa, es decir, para evitar el Set-Point Kick. Esto se logra al colocar la ganancia proporcional y el bloque derivativo directamente en el lazo de realimentación, separados de la señal de referencia, como se muestra en la figura ilustrativa \ref{fig:Diagrama en bloques ilustrativo del controlador}:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.60\textwidth]{Diagrama en bloques del Control (sin observador)}
-    \caption{Diagrama en bloques del Control (sin observador).}
-    \label{fig:Diagrama en bloques del Control (sin observador)}
+    \includegraphics[width=0.60\textwidth]{Diagrama en bloques ilustrativo del controlador}
+    \caption{Diagrama en bloques ilustrativo del controlador.}
+    \label{fig:Diagrama en bloques ilustrativo del controlador}
 \end{figure}
 
-Como se puede ver en la figura \ref{fig:Diagrama en bloques del Control (sin observador)}, luego del bloque derivador se tiene la velocidad angular omega. Y como es conveniente no tener un bloque derivador (para evitar los problemas de amplificación de señal que conlleva la operación de derivación), se opta por eliminar este bloque derivador. Lo cual, es posible hacerlo si se puede realimentar el valor de la velocidad angular $\omega$. Pero, para ahorrar el tener que añadir un sensor de velocidad al sistema, y como se ha verificado la observabilidad de la planta, y al disponer de un modelo matemático de la misma, se puede estimar dicha variable de estado $\omega$ mediante un Observador de Estados. El observador es una copia de la planta que se agraga con la finalidad de recrear sus variables de estado. La figura \ref{fig:Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento} muestra a modo de referencia, la incorporación del mismo en el diagrama de bloques del sistema completo que se ha obtenido hasta el momento:
+% Como se puede ver en la figura \ref{fig:Diagrama en bloques ilustrativo del controlador}, luego del bloque derivador se tiene la velocidad angular omega. Y como es conveniente no tener un bloque derivador (para evitar los problemas de amplificación de señal que conlleva la operación de derivación), se opta por eliminar este bloque derivador. Lo cual, es posible hacerlo si se puede realimentar el valor de la velocidad angular $\omega$. Pero, para ahorrar el tener que añadir un sensor de velocidad al sistema, y como se ha verificado la observabilidad de la planta, y al disponer de un modelo matemático de la misma, se puede estimar dicha variable de estado $\omega$ mediante un Observador de Estados. El observador es una copia de la planta que se agraga con la finalidad de recrear sus variables de estado. La figura \ref{fig:Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento} muestra a modo de referencia, la incorporación del mismo en el diagrama de bloques del sistema completo que se ha obtenido hasta el momento:
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento}
-    \caption{Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento.}
-    \label{fig:Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento}
-\end{figure}
-[[[[[OJOOOO, EN REALIDAD LA CONSIGNA DE REFERENCIA QUE ENTRA EL USUARIO ES $\theta_l(t)$ (no $\theta_m(t)$) ]]]]]
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\textwidth]{Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento}
+%     \caption{Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento.}
+%     \label{fig:Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento}
+% \end{figure}
 
-Entonces se tiene que, gracias a la implementación del observador, en el controlador I-PD no se necesita derivar la pocisión angular para obtener la velocidad $\omega$, sino que esta es estimada, es decir, recreada en el observador de estados. Por lo que el diagrama de control queda diseñado como se muestra en la figura \ref{fig:Diagrama en bloques del Control}.
+% Entonces se tiene que, gracias a la implementación del observador, en el controlador I-PD no se necesita derivar la posición angular para obtener la velocidad $\omega$, sino que esta es estimada, es decir, recreada en el observador de estados. Por lo que el diagrama de control queda diseñado como se muestra en la figura \ref{fig:Diagrama en bloques del Control}.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.60\textwidth]{Diagrama en bloques del Control}
-    \caption{Diagrama en bloques del Control.}
-    \label{fig:Diagrama en bloques del Control}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.60\textwidth]{Diagrama en bloques del Control}
+%     \caption{Diagrama en bloques del Control.}
+%     \label{fig:Diagrama en bloques del Control}
+% \end{figure}
 
-Cabe aclarar que, el observador de estados y el controlador PID son ambos partes del controlador general de la articulación, y solo se muestran por separado para tener una vista simplificada.
-
-% Si resultara que el controlador I-PD porpuesto no lograra cumplir con los objetivos del proyecto, entonces se optaría por implementar alguna de las variaciones del controlador PID, como un controlador PID de dos grados de libertad.
+% Cabe aclarar que, el observador de estados y el controlador PID son ambos partes del controlador general de la articulación, y solo se muestran por separado para tener una vista simplificada.
 
 
-\subsubsection{GAIN SCHEDULING}
-\label{sec:GAIN SCHEDULING}
+\subsubsection{PLANIFICACIÓN DE GANANCIAS}
+\label{sec:PLANIFICACIÓN DE GANANCIAS}
 
-Debido a que la planta planta es un Sistema LPV, entonces como se mencionó, se implementará la técnica de Gain Scheduling a dicho controlador I-PD.
+Debido a que la planta planta es un sistema LPV, como se mencionó, dicho controlador I-PD ha sido implementado en simulink mediante la técnica de planificación de ganancias.
 
-SCHEDULING VARIABLE y PASO DE DISCRETIZACIÓN=CANTIDAD DE PIDs:
-Simplemente hay que hacer que las ganancias del PID cambien solo cuando cambie un cierto valor fijo (un paso) el MOMENTO DE INERCIA, el cual ES NUESTRA ÚNICA VARIABLE DE PROGRAMACIÓN (SCHEDULING VARIABLE). No cuando se modifique un cierto ángulo cada articulación. Este paso debe ser lo suficientemente pequeño como para obtener un buen desempeño del sistema en cualquier punto de todo su rango de operación; pero no demasiado pequeño porque mientras más pequeño sea, implica más puntos de operación en donde se tienen que ajustar las ganancias del PID, y tendríamos que ajustar demasiados PIDs, [es decir, se tendría una matriz (vector en mi caso, por tener solo una Variable de Scheduling) con muchas casillas, muchos PIDs].
+Se tiene un única variable de planificación, que es el momento de inercia $J_l$, el cual lo ha dividido en cuatro valores igualmente separados por un paso fijo \ref{eq:Valores elegidos de Jl}. Este paso debe ser lo suficientemente pequeño como para obtener un buen desempeño del sistema en cualquier punto de todo su rango de operación; pero no demasiado pequeño porque mientras más pequeño sea, implica más puntos de operación en donde se tienen que ajustar las ganancias del PID, y tendríamos que ajustar demasiados controladores PID.
 
-En términos generales, el diseño de un sistema de control de programación de ganancias requiere cuatro etapas:
+\paragraph{ETAPAS DEL DISEÑO DE UN PLANIFICADOR DE GANANCIAS:}
+\label{sec:ETAPAS DEL DISEÑO DE UN PLANIFICADOR DE GANANCIAS:}
+\hfill
+
+\hfill
+
+En términos generales, el diseño de un sistema de control de planificación de ganancias requiere de cuatro etapas:
 \begin{enumerate}
-    \item LINEALIZAR LA PLANTA EN CADA PUNTO DE OPERACIÓN DE DISEÑO (DESIGN OPERATING CONDITION).
-    \item AJUSTAR LAS GANANCIAS DEL CONTROLADOR PID EN CADA PUNTO DE OPERACIÓN DE DISEÑO.
-    \item IMPLEMENTAR UNA ARQUITECTURA (SCHEDULING ARCHITECTURE) QUE INTERCAMBIE ENTRE LAS GANANCIAS DEL PID ESTABLECIDAS, BASADO EN LA O LAS VARIABLES DE PROGRAMACIÓN (SCHEDULING VARIABLES).
-    % - A SIMPLE SWITCH:
-    %         if(someValue < value):
-    %             gain_set = A;
-    %         elseif(someValue >= value):
-    %             gain_set = B;
-    %         end
-    %     Este simple intercambiador, suele no ser una buena alternativa en la mayoría de sistemas, produce sacudones no deseadas cuando se produce el intercambio. Esto es debido a que al ir cambiando las variables de programación del sistema de forma continua, al cambiar de forma discreta las ganancias del PID, el error que se produce un salto discreto en la/s variable/s manipulada/s, lo que crea (un sacudón) oscilaciones no deseadas es la salida del sistema
-    % - A TRANSIENT-FREE SWITCH:
-    %     Este intercambiador de ganancias, consiste en hacer que el cambio en el valor de las ganancias sea más suave, haciendo que la curva de ganancia vs tiempo siga una ecuación polinómica. Como por ejemplo la ecuación de una línea recta (ver imagen), o mejor aún, una curva más suave en el tiempo como  una ecuación cuadrática (la cual también se puede construir como una serie de puntos que luego se interpolan), desde un punto de operación de diseño a otro.
-    %     Y si se tuviera más de una variable de programación, entonces se tendría una superficie sueave que une los puntos, en ejes cartesiasnos (variable1, variable2, tiempo). Y si se tuvieran más variables de programación simplemente esta superficie se vuelve de orden mayor, y no la podemos visualizar, al menos no fácilmente.
+    \item Linealizar la planta en cada punto de operación.
+    \item Ajustar las ganancias del controlador PID en uno de estos puntos de operación.
+    \item Implementar una arquitectura que planifique el mejor valor para cada ganancia del PID, en base al valor de la variable (o las variables) de planifición.
+
+    Dicha arquitectura debe definir una curva de cada ganancia vs parámetro variable (o parámetros variables) que no posea saltos. Esto es debido a que, al ir cambiando el valor de una variable de planificación del sistema de forma continua, al cambiar de forma discreta las ganancias del PID, el error que se produce un salto discreto en la/s variable/s manipulada/s, lo que crea (un sacudón) oscilaciones no deseadas es la salida del sistema, al producirse un salto en el valor de la ganancia,esto produciría oscilaciones no deseadas (un sacudón) en la salida del sistema.
+    En lugar de ello, dicha curva de cada ganancia vs parámetro variable debería corresponderse con alguna función polinómica, como líneas rectas que unan los valores del parámetro variable, o mejor aún, una curva más suave en el tiempo como  lo es una ecuación cuadrática.
+
+    Cabe mencionar que si se tuvieran dos variables de planificación, entonces en lugar de una curva, se tendría una superficie. Y si se tuvieran más variables de planificación simplemente esta superficie se vuelve de orden mayor, y no es posible visualizarla fácilmente.
     %     - Herramientas SYS_TUNE y CONTROL_SYSTEM_TUNER de MATLAB and Simulink:
     %             Estas herramientas permiten:
     %                 - Elegir los puntos de operación de diseño.
-    %                 - Definir la superficie de variables de programación vs tiempo como una superfície polómica (mediante una ecuación).
+    %                 - Definir la superficie de variables de planificación vs tiempo como una superfície polómica (mediante una ecuación).
     %                 - AJUSTAR (Tunear) AUTOMÁTICAMENTE LAS GANANCIAS DEL PID, en cada punto de operación de diseño. (ejemplo en descripción del video).
-    \item EVALUAR EL DESEMPEÑO DEL CONTROL EN DIFERENTES PUNTOS DE OPERACIÓN:
-Esta evaluación conviene hacerla automáticamente por simulación, ya que es mucho más rápido que hacerla manualmente. Y claro que no se va a evaluar cada posible punto (ya que son demasiados, infinitos en la realidad) por lo que hay que elegir cuidadosamente cuáles puntos de operación evaluamos y cuales no. hay que asegurarse que evaluamos todas las transiciones y las casos esquinas (corner cases).
+    \item Evaluar el desempeño del control en los diferentes posibles puntos de operación.
+
+    % Esta evaluación conviene hacerla automáticamente por simulación, ya que es mucho más rápido que hacerla manualmente. Y claro que no se va a evaluar cada posible punto (ya que son demasiados, infinitos en la realidad) por lo que hay que elegir cuidadosamente cuáles puntos de operación evaluamos y cuales no. Hay que asegurarse que se evalúan todas las transiciones y los casos esquinas.
 \end{enumerate}
 
+\paragraph{IMPLEMENTACIÓN DEL PLANIFICADOR DE GANANCIAS:}
+\label{sec:IMPLEMENTACIÓN DEL PLANIFICADOR DE GANANCIAS:}
+\hfill
+
+\hfill
+
+Como ya se cuenta con una planta lineal para cada uno de los 4 puntos de operación considerados, se procede a ajustar las ganancias kp, ki y kd de cada uno de los controladores I-PD para cada una de las 4 plantas. Se hace uso de la función de MATLAB: $[C,info]=pidtune(sys,type,wc)$ para ajustar automáticamente los valores de las ganancias; junto con el bloque de simulink llamado: PID de 2 grados de libertad variable, y 3 tablas de búsqueda correspondientes a cada una de las 3 ganancias. Cada tabla de búsqueda realiza una interpolación lineal de los 4 valores de la ganancias ajustados. Así al recibir cualquier valor posible del parámetro variable $Jl$, entrega un valor correspondiente de la ganancia al bloque del controlador I-PD, como se muestra a continuación:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Sistema Controlador-Planta}
+    \caption{Sistema Controlador-Planta.}
+    \label{fig:Sistema Controlador-Planta}
+\end{figure}
+
+Cabe mencionar que, luego de juntar la parte de arriba del modelo correspondiente al cálculo de $Jl$, con la parte de abajo del mismo correspondiente al controlador y bloque de la planta, la simulación comenzó a correr más lenta que el tiempo real. Entonces, se procedió a evalual el rendimiento del tiempo de ejecución del modelo mediante el \textbf{Profiler de Simulink}, con el cual se descubrió que la Función S de nivel 2 estaba realentizando al sistema debido a que se calculaba el momento de inercia $Jl$ en cada iteración. Por lo que se incorpocó un condicional if para que solo lo calcule cuando alguna posición angular (que no sea de la articulación base) de consigna, no coincida con la posición angular corresondiente del robot en la simulación de CoppeliaSim.
+
+Y luego de realizar este ajuste en el código, la simulación en Simulink corría más rápido que el tiempo real, con lo que instaló el kernel de tiempo real de simulink y Se incorporó al modelo, el bloque llamado: sincronización de tiempo real .
+
+Por otro lado, mediante la información devuelta por la función pidtune de MATLAB, mediante código de MATLAB se corroboró la estabilidad de los 4 sistemas controlador-planta:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Información de vuelta por la función pidtune de MATLAB}
+    \caption{Información de vuelta por la función pidtune de MATLAB.}
+    \label{fig:Información de vuelta por la función pidtune de MATLAB}
+\end{figure}
+
+
+\paragraph{RESPUESTA DEL SISTEMA CONTROLADOR-PLANTA:}
+\label{sec:RESPUESTA DEL SISTEMA CONTROLADOR-PLANTA:}
+\hfill
+
+\hfill
+
+Para evaluar la respuesta del sistema controlador-planta, se toma como referencia una consigna de $\omega_l$ tapezoidal, la cual se la integra para obtener una consigna de $\theta_l$ que describe una rampa suave en el tiempo desde cero a 360°. Y además a los 6 segundos se aplica el $T_{l_{\text{máx}}}=330 ~N.m$.
+
+La respuesta se evalúa para tres valores del parámetro variable: su valor mínimo, su valor máximo, y un valor $J_l=6,6261 ~kg.m^2$ el cual es un valor intermedio de los 4 puntos de operación tomados para el diseño de los respectivos 4 controladores I-PD:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Los 3 puntos de operación evaluados}
+    \caption{Los 3 puntos de operación evaluados.}
+    \label{fig:Los 3 puntos de operación evaluados}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Respuesta del sistema controlador-planta}
+    \caption{Respuesta del sistema controlador-planta.}
+    \label{fig:Respuesta del sistema controlador-planta}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Zoom de la respuesta a la consigna trapezoidal de velocidad integrada, del sistema controlador-planta}
+    \caption{Zoom de la respuesta a la consigna trapezoidal de velocidad integrada, del sistema controlador-planta.}
+    \label{fig:Zoom de la respuesta a la consigna trapezoidal de velocidad integrada, del sistema controlador-planta}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Zoom de la respuesta a la pertubación escalón del sistema controlador-planta}
+    \caption{Zoom de la respuesta a la pertubación escalón del sistema controlador-planta.}
+    \label{fig:Zoom de la respuesta a la pertubación escalón del sistema controlador-planta}
+\end{figure}
+
+Además se aprecian los siguentes valores de $v_a$ e $i_a$ y la variación máxima de $\theta_l$ al aplicar la carga:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \cline{1-4}
+    \textbf{$J_{l_{\text{mín}}}$}        & $i_{a_{\text{máx}}} ~[A]$ & $v_{a_{\text{máx}}} ~[V]$ & $\Delta\theta_l$° \\\cline{1-4}
+    \textbf{Respuesta a la referencia}   & 2,3                       & 47,9                      & -                 \\\cline{1-4}
+    \textbf{Respuesta a la perturbación} & 19,4                      & 13,1                      & 0,8               \\\cline{1-4}
+    \end{tabular}
+    \caption{\label{table:Valores de la respuesta del sistema controlador-planta para Jlmín}Valores de la respuesta del sistema controlador-planta para $J_{l_{\text{mín}}}$.}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \cline{1-4}
+    \textbf{$J_l=6,6261 ~kg.m^2$}        & $i_{a_{\text{máx}}} ~[A]$ & $v_{a_{\text{máx}}} ~[V]$ & $\Delta\theta_l$° \\\cline{1-4}
+    \textbf{Respuesta a la referencia}   & 2,8                       & 47,9                      & -                 \\\cline{1-4}
+    \textbf{Respuesta a la perturbación} & 20,2                      & 13,9                      & 0,8               \\\cline{1-4}
+    \end{tabular}
+    \caption{\label{table:Valores de la respuesta del sistema controlador-planta para Jl=6,6261}Valores de la respuesta del sistema controlador-planta para $J_l=6,6261 ~kg.m^2$.}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+    \cline{1-4}
+    \textbf{$J_{l_{\text{máx}}}$}        & $i_{a_{\text{máx}}} ~[A]$ & $v_{a_{\text{máx}}} ~[V]$ & $\Delta\theta_l$° \\\cline{1-4}
+    \textbf{Respuesta a la referencia}   & 3,3                       & 47,9                      & -                 \\\cline{1-4}
+    \textbf{Respuesta a la perturbación} & 21,1                      & 14,7                      & 0,8               \\\cline{1-4}
+    \end{tabular}
+    \caption{\label{table:Valores de la respuesta del sistema controlador-planta para Jlmáx}Valores de la respuesta del sistema controlador-planta para $J_{l_{\text{máx}}}$.}
+\end{table}
+
+
+Se puede observar que el sistema no conserva ningún error de estado estacionario al cesar el cambio de consigna, pero si se observa un error de estado estacionario cuando la consigna (tanto de velocidad como de posición angular) se encuentra describiendo una rampa. El valor máximo de error estacionario ante la  consigna rampa de $\theta_l$ correspondiente al $J_{l_{\text{máx}}}$ es de 27°, y el desfasaje del robot con la rampa de consigna es de solo 0,22 s el cual es un tiempo aceptable para la aplicación. Aunque dicho error de estado estacionario se podría eliminar agregando un integrador puro al sistema.
 
 
 
@@ -1500,251 +1634,395 @@ Esta evaluación conviene hacerla automáticamente por simulación, ya que es mu
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-\subsubsection{FILTRO DE KALMAN}
-\label{sec:FILTRO DE KALMAN}
-
-% El FILTRO DE KALMAN, ES UN ESTIMADOR DE ESTADOS (es decir: es UN OBSERVADOR) SOLO QUE CALCULA LA MATRIZ L DE OTRA FORMA: CONSIDERANDO QUE el sistema está afectado por ruido. Considera que TANTO LOS ESTADOS 'x' COMO LA SALIDA 'y' DEL SISTEMA ESTÁN AFECTADOS POR RUIDO CON DISTRIBUCIÓN GAUSSIANA O NORMAL, Y CON MEDIA CERO. Además de ser un estimador, ES UN ESTIMADOR ÓPTIMO, ya que trata de encontrar los valores de 'x' y de 'y', a partir de minimizar el error entre los estados 'x' reales del sistema, y los estados $^$x estimados.
 
 % ======================================================================
 \subsection{PROCESAMIENTO DE SEÑALES}
 \label{sec:PROCESAMIENTO DE SEÑALES}
 
-Como prácticamente en todo sistema mecatrónico, se cuenta con señales de salida, que son capturadas a través del uso de sensores. Dichos sensores distan de ser perfectos, por lo que siempre introducen ruido a la señal física que se trata de medir. Ejemplos de estos sensores son giróscopos, acelerómetros, encoders, sensores ultrasónicos, entre otros.
 
-Entonces, el proyecto propuesto debe:
+\subsubsection{INCORPORACIÓN DE RUIDO EN LA PLANTA}
+\label{sec:INCORPORACIÓN DE RUIDO EN LA PLANTA}
 
-\begin{enumerate}
+A continuación, se incorpora ruido al proceso. Esto sirve para representar a las perturbaciones o fluctuaciones no controladas que afectan al sistema dinámico, las cuales pueden surgir de diversas fuentes, como errores en el modelo matemático utilizado para describir el sistema, influencias ambientales, la variabilidad inherente del sistema o cualquier otra fuente de incertidumbre.
 
-    \item Simular las imperfecciones de los sensores de salida al agregar ruido a las señales que se obtienen a la salida del modelo.
+El ruido del proceso se modela como una señal aleatoria que se suma al modelo dinámico del sistema. Con lo que el sistema en el espacio de estados \ref{eq:modelo completo de la planta en forma matricial} se convierte en:
 
-    \item La o las salidas del sistema deben ser ruidosas. El nivel de ruido debe estar en función de la hoja de datos de un sensor real.
-    % \item El nivel del ruido debe replicar el de algún sensor real, según lo que conste en la hoja de datos provista por el fabricante del sensor.
-\end{enumerate}
+\begin{align} \label{eq:modelo completo de la planta en forma matricial con ruido}
+    \begin{cases}
+        \dot{x}\left(t\right)=A.x\left(t\right)+B.u\left(t\right)+v\left(t\right)
+        \\
+        y(t)\ =\ C.\ x(t)
+    \end{cases}
+\end{align}
 
-Se le agragará ruido blanco gaussiano en el sensor, y se incorporará un filtro de tipo FIR en el lazo de realimentación para evitar la propagación de dicho ruido dentro del controlador.
+En donde $v(t)$ es un vector 3x1 de variables con media cero y varianza de $1\times10^{-3}$.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.35\textwidth]{Generación del ruido del proceso}
+    \caption{Generación del ruido del proceso.}
+    \label{fig:Generación del ruido del proceso}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Incorporación del ruido del proceso}
+    \caption{Incorporación del ruido del proceso.}
+    \label{fig:Incorporación del ruido del proceso}
+\end{figure}
 
-ENCODER: Tenemos un sensor ideal (porque es la posición de un valor de un ángulo de un eslabón). Entonces se que genera un vector de ruido aleatorio y se lo sumamos. [Este vector de ruido aleatorio tiene un valor que se correponde con el ENCODER COMERCIAL que usa el robot].
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Respuesta del Sistema con Ruido del proceso}
+    \caption{Respuesta del Sistema con Ruido del proceso.}
+    \label{fig:Respuesta del Sistema con Ruido del proceso}
+\end{figure}
 
-[Sensores como: Tacogenerador, Sensor de Efecto Hall, Encoder (incremental, absoluto y/o serial), Resolver]
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Acercamiento de la respuesta del Sistema con Ruido del proceso}
+    \caption{Acercamiento de la respuesta del Sistema con Ruido del proceso.}
+    \label{fig:Acercamiento de la respuesta del Sistema con Ruido del proceso}
+\end{figure}
 
-[[[BLDC motors usually require position feedback via Hall Effect sensors, optical encoders, or via sensing of back-EMF.]]] %https://ar.mouser.com/applications/considerations-choosing-advance-robotics/?_gl=1*8fhvyb*_ga*NjIwNDUxOTA5LjE3MDAyNjA1Mjk.*_ga_15W4STQT4T*MTcwNzI0NTg0MC4yLjAuMTcwNzI0NTg0OC41Mi4wLjA.*_ga_1KQLCYKRX3*MTcwNzI0NTg0MC4xLjAuMTcwNzI0NTg0OC4wLjAuMA..$
+\subsubsection{INCORPORACIÓN DE RUIDO EN EL SENSOR}
+\label{sec:INCORPORACIÓN DE RUIDO EN EL SENSOR}
 
+A continuación, también se incopora el sensor de la salida a ser realimenta, modelándolo con ruido para obtener una simulación más realista del sistema, con el cual se conseguirá robustecer el control.
 
-[[[Los Robots Colaborativos, que trabajan junto a humanos, necesitan alta rigidez y retroalimentación de DOBLE ENCODER para aumentar la detección de fuerza y monitorear la consistencia, suavidad, y precisión. Doble-Encoder. URL: %https://www.youtube.com/watch?v=EaaSNB8vfKU&t=87s
-OPTIRIAL Series Encoder. URL: %https://www.electromate.com/media/assets/catalog-library/pdfs/celera-motion/data_sheet_1001_optira_encoders.pdf]]]
+Como sensor para medir la posición angular de la articulación del robot se dispone de un encoder absoluto. El cual, comparado con un encoder incremental, tiene la ventaja de que puede medir la posición absoluta del eje en cualquier momento, incluso luego de un corte en el suministro de energía eléctrica, sin necesidad de tener que recalibrarlo. Esta robustez en la determinación de la posición absoluta es fundamental para un cobot, por motivos de seguridad. Además dicha ventaja lo hace más robusto en su cuenta de pulsos, los cuales en un encoder incremental es más común tener la pérdida de algún pulso o contar un pulso falso, debido a diferentes factores, como la contaminación del disco del codificador, la exposición a interferencias electromagnéticas, vibraciones mecánicas y fluctuaciones en la fuente de alimentación, entre otras.
 
+Como encoder absoluto se selecciona el AD58S DRIVE-CLiQ de la empresa Hengstler \cite{Absolute_Encoder_Datasheet}, el cual es del tipo óptico, y posee una resolución monovuelta de 24 bits \ref{fig:Datasheet del encoder}. Dicha resolución, se corresponde con una precisión de $+-35''=+-\frac{7}{720}\text{°}=+-0,0097\overline{2}$°.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Datasheet del encoder}
+    \caption{Datasheet del encoder.}
+    \label{fig:Datasheet del encoder}
+\end{figure}
 
+Como el encoder se coloca entre el motor y el reductor, entonces la precisión para el eje de salida del reductor termina siendo: $+-\frac{0,58\overline{3}\text{°}}{r}=+-0,000060763$°
 
+Y se tiene que para el alcance máximo de $1,300 ~m$ del brazo robótico, y una repetibilidad del mismo de $+-0,0001 ~m$, aplicando el teorema del coseno \ref{fig:Aplicación del teorema del coseno para obtener la precisión del robot en grados}, se obtiene una precisión angular de $+-0,0044$°. La cual, al multiplicarse por r=160 se obtiene una precisión angular en el eje del motor igual a: $+-0,0044\text{°}=0,704$°. Y, al ser esta presición nescesaria mayor que la precisión que posee el encoder, se puede intuir que dicho sensor de posición seleccionado es adecuado.
 
+Cabe aclarar, que si se controlaran todas las articulaciones del robot, habría que recalcular la precisión angular, considerando la contribución de las demás articulaciones en la configuración articular más desfavorable del robot.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Aplicación del teorema del coseno para obtener la precisión del robot en grados}
+    \caption{Aplicación del teorema del coseno para obtener la precisión del robot en grados.}
+    \label{fig:Aplicación del teorema del coseno para obtener la precisión del robot en grados}
+\end{figure}
 
+Al sensor se lo modelo como un conversor A/D, al cual se le agrega ruido para simular la precisión especificada en la hoja de datos.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Conversor Analógico Digital}
+    \caption{Conversor Analógico Digital.}
+    \label{fig:Conversor Analógico Digital}
+\end{figure}
 
-\subsection{VERIFICACIÓN}
-\label{sec:VERIFICACIÓN}
-
-La verificación es el proceso de determinar que el modelo y su solución representan precisamente la descripción conceptual del desarrollador.
-
-[[[[Es necesario incluir un exhaustivo análisis de perturbaciones al sistema completo, el cual incluye el modelo de planta más el controlador.]]]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[[[[[[[[[Ahora, como la consigna de referencia que se comanda para controlar a un motor, en general mantiene su valor en el tiempo hasta que el controlador recibe otro valor de la consigna de referencia. Entonces lo que se desea lograr al discretizar el controlador, es mantener la respuesta del sistema ante escalones de consigna. Por lo que se elige trabajar con el método zoh.]]]]]]]]]%%%%%%%%%% RESUMIR PORQUÉ NO SE UTILIZA EL MÉTODO DE ZOH: https://www.youtube.com/watch?v=yetLPW9sQaI&list=PLUMWjy5jgHK0MLv6Ksf-NHi7Ur8NRNU4Z&index=5
-
-Cabe mencionar que cuando la constante de tiempo del sistema es lenta en comparación con los tiempos de muestreo, entonces todos los métodos de discretización producen respuestas prácticamente iguales, por lo que daría lo mismo cualquiere método. Pero, como se comentó, la idea es justamente tratar de utilizar un tiempo de muestreo lo más bajo posible, por lo que sí tiene importancia la elección de un método de discretización en particular.
-
-- [[[["Luego de realizar la discretización del controlador se debe evaluar la estabilidad del sistema, ya que al ejecutar el controlador en una computadora (digital claro) se introducen retardos, debido a lo que se demora en ejecutar el algoritmo en cada iteración, lo que hace que en el diagrama de Bode se corra la curva de fase vs frecuencia hacia abajo, disminuyendo el margen de fase, lo que puede hacer que el sistema se vuelva inestable"]]]]
-
-
-
-\subsection{VALIDACIÓN}
-\label{sec:VALIDACIÓN}
-
-La validación es el proceso de determinar el grado de precisión con el que el modelo representa al mundo real, desde la perspectiva de los usos previstos del modelo.
-
-Se procede validar el sistema desarrollado. A falta de disponer físicamente del robot, la validación del modelo propuesto de la planta a controlar se realizará comparándolo con un modelo matemático más cercano a la realidad, elaborado teniendo en cuenta las no linealidades del robot. Y además, li
-
-\subsubsection{VALIDACIÓN DE LA PLANTA}
-\label{sec:VALIDACIÓN DE LA PLANTA}
-
-El MODELO DE DISEÑO [DE LA PLANTA] es un conjunto de modelos lineales cada uno con un $J_l=J_Z$ constante distinto.
-
-El MODELO DE VALIDACIÓN [DE LA PLANTA](es el modelo realista, es decir el que incluye todas las no linealidades del robot).Es un único modelo no lineal. Pero en realidad este modelo no lineal termina siendo el mismo que el modelo lineal, porque:
-        1) NO NECESITO CONSIDERAR la modelización de LAS VIBRACIONES PRODUCIDAS EN LOS MOTORES de las articulaciones (como el proyecto de vibratoria), YA QUE:
-                - Las articulaciones que más influirían serían las del hombro y el codo, por sostener a los eslabónes más largos, pero los ejes de giro de estás son siempre perpendiculares al eje Z de giro de la articulación base.
-                - LOS MOTORES VIENEN CON la opcion de incluirle UN FRENO, que solo se activa siempre que una articulación del robot deja de moverse (como el freno de mano de un auto), el cual impide absolutamente todo movienmieto relativo entre los dos eslabones correspondientes!!! %(Referencia: AKM2G-KM_SG_000315_RevB_EN-mobile).
-
-        2) Para incluir la nolinealidad del momento de inercia variable simplemente debería reemplazar la variable $J_l=J_Z$ por su ecuación en función de las posiciones articulares. Pero hacerlo no tiene sentido, ya que debido a la consideración de movimiento MONOARTICULAR, dicha variable $J_l=J_Z$ termina siendo una constante para cada posición articular dada, tal y como se encuentra ya modelada la planta en la sección del modelo (lineal) de la planta.
-
-\subsubsection{VALIDACIÓN DEL CONTROLADOR}
-\label{sec:VALIDACIÓN DEL CONTROLADOR}
-El controlador se diseñó en tiempo continuo como se ha trabajado durante el cursado. Pero ahora en la validación del modelo, el bloque del controlador será implementado en tiempo discreto con representación en punto fijo.
-
-\paragraph{FUNDAMENTO DE LA UTILIZACIÓN DE UN CONTROLADOR DISCRETO:}
-\label{sec:FUNDAMENTO DE LA UTILIZACIÓN DE UN CONTROLADOR DISCRETO:}
+\paragraph{Primera Etapa del Modelo de un Conversor A/D:}
+\label{sec:Primera Etapa del Modelo de un Conversor A/D:}
 \hfill
 
 \hfill
+
+La primera etapa del modelo consiste en el muestreo y retención (en inglés: sample and hold) de la señal de salida continua y variable en el tiempo $x(t)$, proveniente del sistema.
+
+El objetivo de esta primera etapa, es simplemente el del mantener por un tiempo determinado un valor típicamente de tensión a la entrada del conversor A/D. Lo cual es necesario ya que el conversor A/D no puede realizar la conversión del valor de tensión a un valor binario de forma instantánea, sino que le toma un cierto tiempo finito distinto de cero. Cabe aclarar que para el caso de un encoder absoluto físico, este no utiliza un valor de tensión proporcional a la variable que mide, sino que realiza el muestreo y retención físicamente, con el propio mecanismo con el que funciona.
+
+La etapa de muestreo y retención se la simula en Simulink mediante un retenerdor de orden cero, bloque llamado: zero-order hold (ZOH), al cual se le ingresa como parámetro el periodo de muestreo T. El valor de T se obtiene al extraer la variable de salida $\theta_m$, de la cual se obtiene el vector de tiempo tout de dicha señal. Y si se comprueba que paso de tiempo $\Delta t$ de dicho vector se mantiene igual, entonces se utiliza este como tiempo de muestreo en el bloque ZOH. Así se obtuvo un período $T=\Delta t=0,01s$.
+
+\paragraph{Segunda Etapa del Modelo de un Conversor A/D:}
+\label{sec:Segunda Etapa del Modelo de un Conversor A/D:}
+\hfill
+
+\hfill
+
+La segunda etapa consiste en el conversor A/D propiamente dicho, al cual a su vez se lo divide en tres subetapas:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Tres subetapas del conversor AD propiamente dicho}
+    \caption{Tres subetapas del conversor A/D propiamente dicho.}
+    \label{fig:Tres subetapas del conversor A/D propiamente dicho}
+\end{figure}
+
+El subbloque C/D muestrea (discretiza) el valor continuo de tensión mantenida constante, correspondiente de la variable $x_0(t)$ a medir, a un solo valor (discreto) x[t].
+
+Luego, el bloque cuantizador toma el valor discretizado x[t], y le da un valor $\hat{x}[t]$ correspondiente a uno de valores de los que le es posible representar, los cuales dependen de la cantidad de bits que tenga el conversor A/D. Y al hacerlo, se tiene que este subbloque introduce ruido, debido a la misma cuantificación de la señal.
+
+Finalmente, el bloque codificador toma al valor valor $\hat{x}[t]$, y lo acomoda a un tipo de sistema de numeración deseado (como binario con o sin signo, complemento A2, o punto flotante, entre otros), obteniendo un valor $\hat{x_B}[t]$ representado en dicho sistema de numeración.
+
+\paragraph{Obtención del Ruido que genera el Encoder:}
+\label{sec:Obtención del Ruido que genera el Encoder:}
+\hfill
+
+\hfill
+
+El ruido aportado por el encoder se simula como ruido Gaussiano, con media cero y varianza:
+
+\begin{subequations} \label{eq:Cálculo de la Varianza correspondiente al ruido aportado por la precisión del sensor}
+	\begin{align}
+        \sigma_{sensor}^2=\varphi_{\text{precisión}}^2
+        \\
+        \sigma_{sensor}^2=(0,0097\overline{2}\text{°}.\frac{\pi ~rad}{180\text{°}})^2
+        \\
+        \label{eq:Varianza} \sigma_{sensor}^2=2,89\times10^{-8} ~[rad^2]
+	\end{align}
+\end{subequations}
+
+Este ruido se lo modela como ruido blanco Gaussiano, mediante el bloque de Simulink llamado: Band-Limited White Noise. A dicho bloque, se le ingresa como parámetro varianza previamente calculada.
+
+A continuación se muestra el diagrama en bloques del modelo del sensor modelado, con el que se obteniene la salida censada del sistema:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Diagrama en bloques del modelo del sensor obtenido}
+    \caption{Diagrama en bloques del modelo del sensor obtenido.}
+    \label{fig:Diagrama en bloques del modelo del sensor obtenido}
+\end{figure}
+
+Y en la siguiente figura se muestra el ruido introducido por el sensor:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Salida del sensor para una consigna nula}
+    \caption{Salida del sensor para una consigna nula.}
+    \label{fig:Salida del sensor para una consigna nula}
+\end{figure}
+
+Para mitigar este ruido, se utilizará el filtro de Kalman, el cual se describe a continuación.
+
+
+\subsubsection{FILTRO DE KALMAN DISCRETO}
+\label{sec:FILTRO DE KALMAN DISCRETO}
+
+Se escogió al filtro de Kalman como observador de estados para estimar el valor del ángulo del motor $\theta_m(t)$, el cual que se realimenta al controlador, debido a que al ser el sistema lineal, y al involucrar solo ruido con distribución Gaussiana, entonces el filtro de Kalman el mejor estimador de estados posible. Esto es debido a que el mismo trata de
+encontrar los valores de los estados 'x' y de la/s salida/s 'y', a partir de minimizar el error entre los valores de los estados estimados $\hat{x}(t)$, y los valores reales de los estados $x(t)$ del sistema.
+
+Por otro lado, cabe notar que como el sistema es observable, entonces el filtro de kalman va a ser estable.
+
+El filtro de kalman considera el siguiente sistema de ecuaciones:
+
+\begin{align} \label{eq:sistema de ecuaciones Del filtro de Kalman}
+    \begin{cases}
+        x[k+1]=A.x[k]+B.u[k]+v[k]
+        \\
+        y[k]=C.x[k]+w[k]
+    \end{cases}
+\end{align}
+
+Dónde dónde w representa el ruido de medición, y v el ruido del proceso. En donde se supone que ambos ruidos siguen una distribución Gaussiana con media igual a 0. (Si se tuviera ruido con una distribución distinta se debería utilizar otro tipo de filtro de Kalman (distinto al estandar), como lo es el filtro de Kalman de Partículas).
+
+Los parámetros del diseño del filtro de Kalman son las matrices de covarianzas $R_v$ $R_w$, las cuales representan respectivamente al ruido del proceso y ruido de medición.
+
+Al disponerse de 3 variables de estado, entonces la matriz $R_v$ es de dimensión 3x3, y es una matriz diagonal cuyos valores son iguales a las varianzas del ruido ingresado en las 3 variables de estado:
+
+\begin{align}
+    R_v=\left[\begin{matrix}1\times{10}^{-3}&0&0\\0&1\times{10}^{-3}&0\\0&0&1\times{10}^{-3}\\\end{matrix}\right]
+\end{align}
+
+Por otro lado, al disponerse de solo una variable a medir, entonces la matriz de covarianza $R_w$ correspondiente al ruido del sensor se convierte en un escalar, y es igual al valor de la varianza calculada en la sección \ref{sec:INCORPORACIÓN DE RUIDO EN EL SENSOR}:
+
+\begin{align}
+    R_w=2,89\times10^{-8} %~[rad^2]
+\end{align}
+
+La covarianza del error de estimación $P_{{x}}[k+1]$ es:
+
+\begin{align}
+    P_{\widetilde{x}}\left[k+1\right]=\left(A-L\left[k\right].C\right){.P}_{\widetilde{x}}\left[k\right].\left(A-L\left[k\right].C\right)^T+R_v+L\left[k\right].R_w.L^T\left[k\right]
+\end{align}
+
+Y la ganancia óptima del observador es:
+
+\begin{align}
+    L\left[k\right]=A{.P}_{\widetilde{x}}\left[k\right].C^T\left(R_W+C{.P}_{\widetilde{x}}\left[k\right].C^T\right)^{-1}
+\end{align}
+
+Es importante notar que el filtro de Kalman Discreto es un filtro recursivo, lo que implica que en cada paso de timpo se calcula el estado estimado y la ganancia óptima L.
+
+Existen diferentes enfoques algorítmicos para la implementación del filtro. Para el proyecto actual se eligió el bloque de Simulink: Kalman Filter.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Bloque del filtro de Kalman en Simulink, y su configuración de parámetros}
+    \caption{Bloque del filtro de Kalman en Simulink, y su configuración de parámetros.}
+    \label{fig:Bloque del filtro de Kalman en Simulink, y su configuración de parámetros}
+\end{figure}
+
+% El proceso de estimación del filtro de Kalman puede resumirse en los siguientes pasos:
+
+% Inicialización: Se establece el estado inicial del sistema y se define la matriz de covarianza del error de estimación inicial.
+
+% Predicción: Se predice el nuevo estado del sistema y se calcula la matriz de covarianza de predicción utilizando el modelo dinámico del sistema y la matriz de covarianza del proceso de ruido.
+
+% Actualización (Corrección): Se obtiene una nueva estimación del estado del sistema utilizando la medida más reciente, combinándola con la predicción anterior y su covarianza mediante el teorema de Bayes. Esto se realiza mediante la matriz de ganancia de Kalman, que determina cuánto peso se debe dar a la predicción y cuánto a la medida.
+
+% Repetición: Se repiten los pasos de predicción y actualización para cada nueva medida recibida, refinando continuamente la estimación del estado del sistema.
+
+% -----------------------------------------------------------------------
+% El filtro de Kalman calcula la matriz L considerando que el sistema está afectado por ruido.
+
+
+
+
+% A MEDIDA QUE EL VALOR DEL RUIDO AUMENTA, EL FILTRO DE KALMAN TARDA MÁS EN ESTIMAR EL VALOR DE x1.
+
+El diagrama en bloques del sistema completo obtenido es:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Diagrama de Bloques del Sistema Completo}
+    \caption{Diagrama de Bloques del Sistema Completo.}
+    \label{fig:Diagrama de Bloques del Sistema Completo}
+\end{figure}
+
+
+
+
+
+
+
+% \paragraph{FUNDAMENTO DE LA UTILIZACIÓN DE UN CONTROLADOR DISCRETO:}
+% \label{sec:FUNDAMENTO DE LA UTILIZACIÓN DE UN CONTROLADOR DISCRETO:}
+% \hfill
+
+% \hfill
 %%%%%%%%%%%%%%%%%RESUMIR: $https://www.youtube.com/watch?v=14cMhrp5wlk$
 
 
 
 
 
-\paragraph{SELECCIÓN DEL TIPO DE MÉTODO DE DISCRETIZACIÓN:}
-\label{sec:SELECCIÓN DEL TIPO DE MÉTODO DE DISCRETIZACIÓN:}
-\hfill
+% \paragraph{SELECCIÓN DEL TIPO DE MÉTODO DE DISCRETIZACIÓN:}
+% \label{sec:SELECCIÓN DEL TIPO DE MÉTODO DE DISCRETIZACIÓN:}
+% \hfill
 
-\hfill
+% \hfill
 
-En MATLAB se utiliza la función \cite{c2d}: \textbf{SYSD = c2d(SYSC, TS, METHOD)} para obtener el modelo discreto SYSD, con tiempo de muestreo TS, de un modelo continuo SYSC, mediante el uso del método METHOD, el cual puede ser uno de los siguientes métodos:
-\begin{description}
-    \item ['\textbf{zoh}':] Retención de Orden Cero (siglas del inglés: zero-order hold) o Discretización Invariante al Escalón.
-    \item ['\textbf{foh}':] Retención de Primer Orden (siglas del inglés: first-order hold) o Aproximación Triangular.
-    \item ['\textbf{impulse}':] Discretización de Impulso Invariante.
-    \item ['\textbf{tustin}':] Transformación Bilineal (Tustin).
-    \item ['\textbf{matched}':] Método de Correspondencia de Polos y Ceros.
-    % \item ['\textbf{least-squares}':] Método de Mínimos Cuadrados.
-\end{description}
+% En MATLAB se utiliza la función \cite{c2d}: \textbf{SYSD = c2d(SYSC, TS, METHOD)} para obtener el modelo discreto SYSD, con tiempo de muestreo TS, de un modelo continuo SYSC, mediante el uso del método METHOD, el cual puede ser uno de los siguientes métodos:
+% \begin{description}
+%     \item ['\textbf{zoh}':] Retención de Orden Cero (siglas del inglés: zero-order hold) o Discretización Invariante al Escalón.
+%     \item ['\textbf{foh}':] Retención de Primer Orden (siglas del inglés: first-order hold) o Aproximación Triangular.
+%     \item ['\textbf{impulse}':] Discretización de Impulso Invariante.
+%     \item ['\textbf{tustin}':] Transformación Bilineal (Tustin).
+%     \item ['\textbf{matched}':] Método de Correspondencia de Polos y Ceros.
+%     % \item ['\textbf{least-squares}':] Método de Mínimos Cuadrados.
+% \end{description}
 
-Dichos métodos, convierten a un sistema continuo en un sistema discreto, o bien como suele ser el caso, convierten a un filtro analógico en el dominio S en un filtro digital en el dominio Z.
-Cada uno de los métodos da lugar a una función de transferencia en el dominio Z, la cual es distinta para los distintos métodos. Para un sistema dado, la función de transferencia obtenida siempre posee la misma ecuación característica sin importar el método utilizado, lo que significa que siempre se obtienen unos mismos polos y por lo tanto una misma estabilidad. Pero los ceros de dicha función de transferencia son distintos para cada método. Esto provoca que el modelo discreto obtenido por un método, presente una respuesta con ciertas diferencias respecto a los demás métodos. Por ejemplo, para un modelo con función de transferencia: $G(S)=\frac{1}{S+1}$, se obtiene para cada método la respuesta del modelo discretizado, tanto en el dominio del tiempo como en dominio de la frecuencia, \ref{fig:Diferencias en la respuesta que produce cada método para un modelo dado}:
+% Dichos métodos, convierten a un sistema continuo en un sistema discreto, o bien como suele ser el caso, convierten a un filtro analógico en el dominio S en un filtro digital en el dominio Z.
+% Cada uno de los métodos da lugar a una función de transferencia en el dominio Z, la cual es distinta para los distintos métodos. Para un sistema dado, la función de transferencia obtenida siempre posee la misma ecuación característica sin importar el método utilizado, lo que significa que siempre se obtienen unos mismos polos y por lo tanto una misma estabilidad. Pero los ceros de dicha función de transferencia son distintos para cada método. Esto provoca que el modelo discreto obtenido por un método, presente una respuesta con ciertas diferencias respecto a los demás métodos. Por ejemplo, para un modelo con función de transferencia: $G(S)=\frac{1}{S+1}$, se obtiene para cada método la respuesta del modelo discretizado, tanto en el dominio del tiempo como en dominio de la frecuencia, \ref{fig:Diferencias en la respuesta que produce cada método para un modelo dado}:
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{Diferencias en la respuesta que produce cada método para un modelo dado}
-    \caption{Diferencias en la respuesta que produce cada método para un modelo dado.}
-    \label{fig:Diferencias en la respuesta que produce cada método para un modelo dado}
-\end{figure}
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\textwidth]{Diferencias en la respuesta que produce cada método para un modelo dado}
+%     \caption{Diferencias en la respuesta que produce cada método para un modelo dado.}
+%     \label{fig:Diferencias en la respuesta que produce cada método para un modelo dado}
+% \end{figure}
 
-Las diferencias entre cada método están dadas por el hecho de que cuando un sistema se discretiza, inevitablemente se pierde algo de información al muestrear el sistema continuo. Y cada método se enfoca en minimizar la pérdida de cierta información del sistema por sobre otra. Por lo que la elección del método depende de qué información se desea conservar, lo que depende de qué se desea lograr.
-Por ejemplo, el \textbf{método (impulse) de impulso invariante}, logra que la respuesta del sistema a un impulso sea prácticamente idéntica a la repuesta que tiene el sistema continuo ante el mismo impulso. Mientras que, por ejemplo el \textbf{método (zoh) del retención de orden cero}, no produce una respuesta tan certera al impulso, sino que se enfoca en lograr que coincida la respuesta ante un escalón del sistema discretizado, con la repuesta ante el mismo escalón del sistema continuo \ref{fig:Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}. Debido a ello, al método zoh también se lo suele llamar: método de escalón invariante.
+% Las diferencias entre cada método están dadas por el hecho de que cuando un sistema se discretiza, inevitablemente se pierde algo de información al muestrear el sistema continuo. Y cada método se enfoca en minimizar la pérdida de cierta información del sistema por sobre otra. Por lo que la elección del método depende de qué información se desea conservar, lo que depende de qué se desea lograr.
+% Por ejemplo, el \textbf{método (impulse) de impulso invariante}, logra que la respuesta del sistema a un impulso sea prácticamente idéntica a la repuesta que tiene el sistema continuo ante el mismo impulso. Mientras que, por ejemplo el \textbf{método (zoh) del retención de orden cero}, no produce una respuesta tan certera al impulso, sino que se enfoca en lograr que coincida la respuesta ante un escalón del sistema discretizado, con la repuesta ante el mismo escalón del sistema continuo \ref{fig:Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}. Debido a ello, al método zoh también se lo suele llamar: método de escalón invariante.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}
-    \caption{Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente.}
-    \label{fig:Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}
-\end{figure}
+% % [[[[[[[[[Ahora, como la consigna de referencia que se comanda para controlar a un motor, en general mantiene su valor en el tiempo hasta que el controlador recibe otro valor de la consigna de referencia. Entonces lo que se desea lograr al discretizar el controlador, es mantener la respuesta del sistema ante escalones de consigna. Por lo que se elige trabajar con el método zoh.]]]]]]]]]%%%%%%%%%% RESUMIR PORQUÉ NO SE UTILIZA EL MÉTODO DE ZOH: https://www.youtube.com/watch?v=yetLPW9sQaI&list=PLUMWjy5jgHK0MLv6Ksf-NHi7Ur8NRNU4Z&index=5
 
-Por otro lado, el \textbf{método (foh) de retención de primer orden}, es similar al método zoh, solo que en lugar de mantenener el último valor muestreado constante, mantiene la pendiente constante, produciendo una serie de rampas en lugar de una serie de escalones como en el zoh. Por ello, el método foh conserva la respuesta ante una rampa de entrada, y por ello se lo suele también llamar método de rampa invariante.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\textwidth]{Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}
+%     \caption{Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente.}
+%     \label{fig:Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}
+% \end{figure}
 
-Los tres métodos mencionados (zoh, foh e impulse) producen una respuesta en el tiempo precisa, respectivamente ante una entrada de escalón, rampa o impulso. Sin embargo, el \textbf{método (matched) de correspondencia de polos y ceros}, no trata de tener una respuesta precisa en el tiempo como su contraparte en el dominio S, ni siquiera produce una respuesta en la frecuencia simular. Por esto, el método matched además de ser solo aplicable para sistemas SISO, es como mucho solo un recurso provisional y prácticamente no es utilizado, sino que se prefiere utilizar otro de los métodos. Sino que este método se enfoca en responder a la pregunta: ¿qué ocurre si se mueve cada polo y cero en el dominio S, a su correspondiente lugar en el dominio Z?
+% Por otro lado, el \textbf{método (foh) de retención de primer orden}, es similar al método zoh, solo que en lugar de mantenener el último valor muestreado constante, mantiene la pendiente constante, produciendo una serie de rampas en lugar de una serie de escalones como en el zoh. Por ello, el método foh conserva la respuesta ante una rampa de entrada, y por ello se lo suele también llamar método de rampa invariante.
 
-Y por último se tiene al método más usado, que es el \textbf{método (tustin) de transformación bilineal}, formulado por el ingeniero británico Arnold Tustin. El cual consiste en reemplazar la variable S de laplace por la transformación bilineal dada por siguiente ecuación :
+% Los tres métodos mencionados (zoh, foh e impulse) producen una respuesta en el tiempo precisa, respectivamente ante una entrada de escalón, rampa o impulso. Sin embargo, el \textbf{método (matched) de correspondencia de polos y ceros}, no trata de tener una respuesta precisa en el tiempo como su contraparte en el dominio S, ni siquiera produce una respuesta en la frecuencia simular. Por esto, el método matched además de ser solo aplicable para sistemas SISO, es como mucho solo un recurso provisional y prácticamente no es utilizado, sino que se prefiere utilizar otro de los métodos. Sino que este método se enfoca en responder a la pregunta: ¿qué ocurre si se mueve cada polo y cero en el dominio S, a su correspondiente lugar en el dominio Z?
 
-\begin{align}   \label{eq:Transformación Bilineal}
-    S=\frac{2}{T}.\left(\frac{Z-1}{Z+1}\right)
-\end{align}
+% Y por último se tiene al método más usado, que es el \textbf{método (tustin) de transformación bilineal}, formulado por el ingeniero británico Arnold Tustin. El cual consiste en reemplazar la variable S de laplace por la transformación bilineal dada por siguiente ecuación :
 
-Donde T es el tiempo de muestreo. Y al despejar la variable Z, se obtiene la transformación bilineal inversa:
+% \begin{align}   \label{eq:Transformación Bilineal}
+%     S=\frac{2}{T}.\left(\frac{Z-1}{Z+1}\right)
+% \end{align}
 
-\begin{align}   \label{eq:Transformación Bilineal Inversa}
-    Z=\frac{1+\frac{T}{2}.S}{1-\frac{T}{2}.S}
-\end{align}
+% Donde T es el tiempo de muestreo. Y al despejar la variable Z, se obtiene la transformación bilineal inversa:
 
-En la cual \ref{eq:Transformación Bilineal Inversa}, al reemplazar la variable S por el valor de un polo o cero en el plano-S de un sistema, se puede obtener el correspondiente valor Z del polo o cero en el plano-Z, en función de T. Por esto es el nombre del método.
+% \begin{align}   \label{eq:Transformación Bilineal Inversa}
+%     Z=\frac{1+\frac{T}{2}.S}{1-\frac{T}{2}.S}
+% \end{align}
 
-Y para una función de transferencia de un sistema dado en el dominio S, por ejemplo $G(S)=\frac{2}{S+1}$, si se reemplaza el valor de la variable S por la expresión \ref{eq:Transformación Bilineal}, se obtiene la correspondiente conversión de la función de transferencia en el dominio Z, en función de T. Para el ejemplo de G(S) mencionado, y para un T de por ejemplo 0,1 s, se obtiene:
+% En la cual \ref{eq:Transformación Bilineal Inversa}, al reemplazar la variable S por el valor de un polo o cero en el plano-S de un sistema, se puede obtener el correspondiente valor Z del polo o cero en el plano-Z, en función de T. Por esto es el nombre del método.
 
-\begin{align}   \label{eq:G(Z) de ejemplo}
-    G(Z)=\frac{2.Z+2}{21.Z-19}=\frac{\frac{2}{21}.Z+\frac{2}{21}}{Z-\frac{19}{21}}
-\end{align}
+% Y para una función de transferencia de un sistema dado en el dominio S, por ejemplo $G(S)=\frac{2}{S+1}$, si se reemplaza el valor de la variable S por la expresión \ref{eq:Transformación Bilineal}, se obtiene la correspondiente conversión de la función de transferencia en el dominio Z, en función de T. Para el ejemplo de G(S) mencionado, y para un T de por ejemplo 0,1 s, se obtiene:
 
-Siendo la expresión de la derecha la forma en como la expresa MATLAB, con el denominador con un coeficiente principal igual a 1.
+% \begin{align}   \label{eq:G(Z) de ejemplo}
+%     G(Z)=\frac{2.Z+2}{21.Z-19}=\frac{\frac{2}{21}.Z+\frac{2}{21}}{Z-\frac{19}{21}}
+% \end{align}
 
-Y es la función de transferencia G(Z) \ref{eq:G(Z) de ejemplo}, la que se puede implementar en una computadora digital, utilizando un T=0,1 s.
+% Siendo la expresión de la derecha la forma en como la expresa MATLAB, con el denominador con un coeficiente principal igual a 1.
 
-La figura \ref{fig:Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin} muestra las respuestas en el tiempo y en la frecuencia de la función G(S) dada como ejemplo, en comparación con las respuestas de la función G(Z) obtenida con el método de Tustin.
+% Y es la función de transferencia G(Z) \ref{eq:G(Z) de ejemplo}, la que se puede implementar en una computadora digital, utilizando un T=0,1 s.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin}
-    \caption{Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin.}
-    \label{fig:Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin}
-\end{figure}
+% La figura \ref{fig:Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin} muestra las respuestas en el tiempo y en la frecuencia de la función G(S) dada como ejemplo, en comparación con las respuestas de la función G(Z) obtenida con el método de Tustin.
 
-Como se puede observar, que el método de Tustin crea un sistema discreto que se comporta de forma muy similar a un sistema continuo, tanto en el dominio del tiempo como en el dominio de la frecuencia.
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=1\textwidth]{Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin}
+%     \caption{Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin.}
+%     \label{fig:Comparación de las respuestas, en el tiempo y en la frecuencia, de la función G(S) de ejemplo vs la función G(Z) obtenida utilizando el método de Tustin}
+% \end{figure}
 
-La ecuación \ref{eq:Transformación Bilineal Inversa} se obtiene partiendo de la definición de la variable Z, la cual es:
+% Como se puede observar, que el método de Tustin crea un sistema discreto que se comporta de forma muy similar a un sistema continuo, tanto en el dominio del tiempo como en el dominio de la frecuencia.
 
-\begin{align}   \label{eq:Definición de Z}
-    Z=e^{S.T}
-\end{align}
+% La ecuación \ref{eq:Transformación Bilineal Inversa} se obtiene partiendo de la definición de la variable Z, la cual es:
 
-Debido a que dicha ecuación de Z en función de S \ref{eq:Definición de Z} es una función no lineal, no se utiliza como ecuación de transformación. Ya que (su transformación inversa) daría lugar a funciones de transferencia discretas G(Z) no lineales, por lo que no se podría mover cada polo y cero del dominio S al Z, y contruir G(Z) de forma fácil, solo se podría hacer para puntos individuales.
+% \begin{align}   \label{eq:Definición de Z}
+%     Z=e^{S.T}
+% \end{align}
 
-Por ello, lo que se hace es linealizar $e^{S.T}$. Lo cual se puede lograr utilizando la siguiente expansión en serie de Taylor:
+% Debido a que dicha ecuación de Z en función de S \ref{eq:Definición de Z} es una función no lineal, no se utiliza como ecuación de transformación. Ya que (su transformación inversa) daría lugar a funciones de transferencia discretas G(Z) no lineales, por lo que no se podría mover cada polo y cero del dominio S al Z, y contruir G(Z) de forma fácil, solo se podría hacer para puntos individuales.
 
-\begin{align}   \label{eq:Expansión en Serie de Taylor para e^x}
-    e^x=\sum_{n=0}^{\infty}\frac{x^n}{n!}
-\end{align}
+% Por ello, lo que se hace es linealizar $e^{S.T}$. Lo cual se puede lograr utilizando la siguiente expansión en serie de Taylor:
 
-La cual para $e^{S.T}$, se expande como:
+% \begin{align}   \label{eq:Expansión en Serie de Taylor para e^x}
+%     e^x=\sum_{n=0}^{\infty}\frac{x^n}{n!}
+% \end{align}
 
-\begin{align}   \label{eq:Expansión en Serie de Taylor para e^(S.T)}
-    Z=e^{S.T}=1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...
-\end{align}
+% La cual para $e^{S.T}$, se expande como:
 
-De esta expasión, solo se toman los dos primeros términos para obtener la aproximación lineal de primer orden de Z:
+% \begin{align}   \label{eq:Expansión en Serie de Taylor para e^(S.T)}
+%     Z=e^{S.T}=1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...
+% \end{align}
 
-\begin{align}   \label{eq:Aproximación Lineal de Z}
-    Z \approx 1+S.T
-\end{align}
+% De esta expasión, solo se toman los dos primeros términos para obtener la aproximación lineal de primer orden de Z:
 
-Pero si se toma a $e^{S.T}$, se lo puede dividir en dos exponenciales como:
+% \begin{align}   \label{eq:Aproximación Lineal de Z}
+%     Z \approx 1+S.T
+% \end{align}
 
-\begin{align}   \label{eq:Artificio Matemático}
-    e^{S.T}=e^{\frac{S.T}{2}}.e^{\frac{S.T}{2}}=\frac{e^{\frac{S.T}{2}}}{e^{\frac{-S.T}{2}}}
-\end{align}
+% Pero si se toma a $e^{S.T}$, se lo puede dividir en dos exponenciales como:
 
-Y tanto al numerador como al denominador se lo puede expandir como \ref{eq:Expansión en Serie de Taylor para e^(S.T)}, obteniendo:
+% \begin{align}   \label{eq:Artificio Matemático}
+%     e^{S.T}=e^{\frac{S.T}{2}}.e^{\frac{S.T}{2}}=\frac{e^{\frac{S.T}{2}}}{e^{\frac{-S.T}{2}}}
+% \end{align}
 
-\begin{align}   \label{eq:Mejor Aproximación}
-    \frac{e^{\frac{S.T}{2}}}{e^{\frac{-S.T}{2}}}=\frac{1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...}{1-\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}-\frac{\left(S.T\right)^3}{6}+...}
-\end{align}
+% Y tanto al numerador como al denominador se lo puede expandir como \ref{eq:Expansión en Serie de Taylor para e^(S.T)}, obteniendo:
 
-Con lo que, tomando como aproximación solo los primeros dos términos de las series, se obtiene la ecuación \ref{eq:Transformación Bilineal Inversa} de la transformación bilineal inversa utilizada en el método de Tustin:
+% \begin{align}   \label{eq:Mejor Aproximación}
+%     \frac{e^{\frac{S.T}{2}}}{e^{\frac{-S.T}{2}}}=\frac{1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...}{1-\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}-\frac{\left(S.T\right)^3}{6}+...}
+% \end{align}
 
-\begin{align}   \label{eq:Transformación Bilineal Inversa Demostrada}
-    Z \approx \frac{1+\frac{S.T}{2}}{1-\frac{S.T}{2}}
-\end{align}
+% Con lo que, tomando como aproximación solo los primeros dos términos de las series, se obtiene la ecuación \ref{eq:Transformación Bilineal Inversa} de la transformación bilineal inversa utilizada en el método de Tustin:
 
-La cual es una mejor aproximación de primer orden que \ref{eq:Aproximación Lineal de Z}.
+% \begin{align}   \label{eq:Transformación Bilineal Inversa Demostrada}
+%     Z \approx \frac{1+\frac{S.T}{2}}{1-\frac{S.T}{2}}
+% \end{align}
+
+% La cual es una mejor aproximación de primer orden que \ref{eq:Aproximación Lineal de Z}.
+
+% Cabe mencionar que cuando la constante de tiempo del sistema es lenta en comparación con los tiempos de muestreo, entonces todos los métodos de discretización producen respuestas prácticamente iguales, por lo que daría lo mismo cualquiere método. Pero, como se comentó, la idea es justamente tratar de utilizar un tiempo de muestreo lo más bajo posible, por lo que sí tiene importancia la elección de un método de discretización en particular.
+
 
 
 \paragraph{DISCRETIZACIÓN DEL CONTROLADOR:}
@@ -1753,34 +2031,158 @@ La cual es una mejor aproximación de primer orden que \ref{eq:Aproximación Lin
 
 \hfill
 
-Como se había comentado, el controlador general consiste tanto del bloque controlador I-PD, como del bloque correspondiente al obserbador de estados \ref{fig:Incorporación del Observador de Estados al diagrama de bloques del sistema completo que se ha obtenido hasta el momento}. Y ambos bloques son parte del software de la aplicación real, el cual se ejecuta sobre una computadora física, por lo que tanto el controlador I-PD propiamente dicho como el observador deben ser discretizados.
+Como se había comentado, el controlador completo consiste tanto del bloque controlador I-PD, como del bloque correspondiente al filtro de Kalman. Y ambos bloques son parte del software de la aplicación real, el cual se ejecuta sobre una computadora física. Por lo que, tanto el controlador I-PD propiamente dicho como el filtro de Kalman se implementan de forma discreta. Como ya se posee el filtro de Kalman implementado en forma discreta, se procede a discretizar el bloque controlador de simulink y luego ver los resultados del sistema completo, y analizar la estabilidad del mismo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Parámetros del bloque del controlador P-ID discreto}
+    \caption{Parámetros del bloque del controlador P-ID discreto.}
+    \label{fig:Parámetros del bloque del controlador P-ID discreto}
+\end{figure}
+
+
+% EVALUACIÓN DE ESTABILIDAD DEL CONTROLADOR DISCRETO:
+% - Luego de realizar la discretización del controlador se debe evaluar la estabilidad del sistema, ya que al ejecutar el controlador en una computadora (digital claro) se introducen retardos, debido a lo que se demora en ejecutar el algoritmo en cada iteración, lo que hace que en el diagrama de Bode se corra la curva de fase vs frecuencia hacia abajo, disminuyendo el margen de fase, lo que puede hacer que el sistema se vuelva inestable.
+
+A continuación, se visualizan los bloques continuos y discretos del sistema completo:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Visualización de las bloques discretos y continuos del sistema}
+    \caption{Visualización de las bloques discretos y continuos del sistema.}
+    \label{fig:Visualización de las bloques discretos y continuos del sistema}
+\end{figure}
+
+Se puede observar que existen bloques fuera de la planta continua, que no son discretos; por lo que se procede a discretizarlos:
+
+subparagraph{Discretización de la referencia de entrada al controlador I-PD:}
+\label{sec:Discretización de la referencia de entrada al controlador I-PD:}
+\hfill
+
+La discretización de la consigna de posición, se logró cambiando el bloque integrador de la velocidad en el dominio S, por un bloque integrador en el dominio Z. El bloque signal builder con el que se genera la consigna trapezoidal de velocidad, no se pudo discretizar, probablemente por disponer de una versión vieja de MATLAB. Y sí debería ser discretizado en la implementación real.
+
+\subparagraph{Discretización de la función S de nivel 2 de MATLAB:}
+\label{sec:Discretización de la función S de nivel 2 de MATLAB:}
+\hfill
+
+Por otro lado, también se discretizó la función S de MATLAB de nivel 2, cambiando su parámetro de tiempo de muestreo, que determina la frecuencia con la que se llama a la función. Dicho parámetro se cambia en su código de MATLAB, en el setup, como se muestra a continuación:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Discretización de la función S de nivel 2 de MATLAB con T=0,01 s}
+    \caption{Discretización de la función S de nivel 2 de MATLAB con T=0,01 s.}
+    \label{fig:Discretización de la función S de nivel 2 de MATLAB con T=0,01 s}
+\end{figure}
+
+Como efecto colateral de discretizar esta función S de nivel 2, se obtiene una mejora en el tiempo de ejecución. Esto es, porque dicha función es el cuello de botella, por lo que al discretizarla se la está llamando menos veces en el tiempo. Y al hacer mayor el paso de tiempo T con el que se la llama, se obtiene una mejora en el tiempo de ejecución. Aunque claro, llega un valor de T en el que se comienza a ver demasiado discretizada la simulación en CoppeliaSim.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Revisualización de las bloques discretos y continuos del sistema}
+    \caption{Revisualización de las bloques discretos y continuos del sistema.}
+    \label{fig:Revisualización de las bloques discretos y continuos del sistema}
+\end{figure}
 
 
 
 
 
-
-
-
-EVALUACIÓN DE ESTABILIDAD:
-- [[[["Luego de realizar la discretización del controlador se debe evaluar la estabilidad del sistema, ya que al ejecutar el controlador en una computadora (digital claro) se introducen retardos, debido a lo que se demora en ejecutar el algoritmo en cada iteración, lo que hace que en el diagrama de Bode se corra la curva de fase vs frecuencia hacia abajo, disminuyendo el margen de fase, lo que puede hacer que el sistema se vuelva inestable"]]]]
 
 %======================================================================
 \section{RESULTADOS}
 \label{sec:RESULTADOS}
 
-Se exponen los experimentos llevados adelante. Se muestran tablas y gráficos con los valores obtenidos. Se debe dar una discusión respecto a si los resultados están dentro de los valores esperados. Se agrega al sistema una señal de perturbación y se evalúa su respuesta.
+Para el sistema completo, se obtiene la respuesta para tres valores del parámetro variable: su valor mínimo, su valor máximo, y un valor $J_l=6,2342 ~kg.m^2$, correspondiente a la posición articular [0,30,70,-50,120,0]°, el cual es un valor intermedio de los 4 puntos de operación tomados para el diseño de los respectivos 4 controladores I-PD:
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Los tres puntos de operación evaluados}
+    \caption{Los tres puntos de operación evaluados.}
+    \label{fig:Los tres puntos de operación evaluados}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Respuesta del sistema con filtro de Kalman}
+    \caption{Respuesta del sistema con filtro de Kalman.}
+    \label{fig:Respuesta del sistema con filtro de Kalman}
+\end{figure}
+
+Se observa que la posición angular $\theta_l$ estimada por el filtro de Kalman se corresponde perfectamente con la salida $\theta_l$ de la planta simulada. Incluso se corroboró que la salida $\theta_m$ estimada también sigue perfectamente a la $\theta_m$ de la planta simulada, y sin ruido notable.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Acercamiento a la respuesta del sistema con filtro de Kalman}
+    \caption{Acercamiento a la respuesta del sistema con filtro de Kalman.}
+    \label{fig:Acercamiento a la respuesta del sistema con filtro de Kalman}
+\end{figure}
+
+En este acercamiento se observa claramente, que aunque por más que $\theta_l$ estimada si describe un comportamiento deseado, las variables $v_a*$, $i_a$, y $\omega_l$ presentan un ruido mayor al ruido introducido al sistema. Esto es debido a que al momento de incorporar el filtro de Kalman al sistema, también se discretizó la familia de controladores I-PD. Con lo cual se obtiene una variable manipulada $v_a*$ discreta la cual produce las vibraciones en la corriente $i_a$, y por lo tanto también en la velocidad angular $\omega_l$. Esto produce pequeños sacudones en la velocidad del motor, los cuales describen una curva con una forma que depende fuertemente del paso de tiempo T del controlador discreto. Lo que ocurre es que la señal discreta va*[n], al entrar a la planta continua, simulink agrega (sin que lo veamos) un bloque de ZOH para convertir dicha señal discreta a una señal continua, la cual termina siendo una serie de escalones poco suavizados los cuales general ruido no deseado.
+
+Por otro lado, se observa que para todos los valores del parámetro variable $J_l$ los valores de tensión y corriente se mantienen siempre dentro de los límites dados por la hoja de datos del motor; incluso con el ruido mencionado.
+
+En las siguiente dos figuras se puede percibir que el seguimiento de consigna es adecuado.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Seguimiento de la consigna con filtro de Kalman para Jlmáx}
+    \caption{Seguimiento de la consigna con filtro de Kalman para Jlmáx.}
+    \label{fig:Seguimiento de la consigna con filtro de Kalman para Jlmáx}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Respuesta a la perturbación con filtro de Kalman para Jlmáx}
+    \caption{Respuesta a la perturbación con filtro de Kalman para Jlmáx.}
+    \label{fig:Respuesta a la perturbación con filtro de Kalman para Jlmáx}
+\end{figure}
 
 % ======================================================================
 \section{CONCLUSIONES}
 \label{sec:CONCLUSIONES}
 
-% Expone un resumen conciso del proyecto desarrollado y de los resultados encontrados. Se discute si se cumplió con los objetivos propuestos. Adicionalmente, se puede comentar qué aspectos del proyecto se proponen como mejora para desarrollo a futuro.
+Se concluye que en forma general se cumplieron los objetivos del proyecto, en el desarrollo del sistema de control de posición para el accionamiento electromecánico de la primer articulación del robot Universal UR10. Se modeló correctamente el sistema LTI en el espacio de estados, y se pudo aplicar la técnica de planificación de ganancias, obteniendo una familia de controladores I-PD, que lograron proporcionar un correcto seguimiento de consignas y rechazo de perturbaciones.
+
+Luego, se incorporó ruido en el proceso, y en el sensado de la posición, y luego se utiliza el filtro de Kalman con el objetivo de mitigar dichos ruidos. El filtro de Kalman se lo implentó en tiempo discreto, y con ello también se discretizó el controlador de forma exitosa. Con lo que también se logró un excelente seguimiento de la consigna y reachzo de perturbaciones, e incluso con una variable manipulada discreta la cual introduce un ruido importante en el sistema.
+
+Con lo que terminó obteniendo un buen control de la planta, aunque el proyecto puede ser mejorado en varios aspectos como se indica a continuación.
 
 \subsection{Mejoras}
 \label{sec:Mejoras}
+
+\paragraph{RUIDO INTRODUCIDO POR LA SEÑAL MANIPULADO DISCRETA:}
+\label{sec:RUIDO INTRODUCIDO POR LA SEÑAL MANIPULADO DISCRETA:}
+\hfill
+
+Como principal mejora, se debería mitigar el ruido provocado por la salida discreta del controlador I-PD. Ya que provoca un ruido no deseado en las variables de estado de la planta, el cual es mayor al propio ruido de proceso introducido para simular las incertidumbres del modelo. Para ello se debería implementar un filtro pasa bajos a la salida del controlador discreto, el cual permita atenuar las componentes de alta frecuencia generadas por la señal cuadrada $v_a*(t)$. Se propone la implementación de un filtro gigital del tipo FIR, el cual en comparación con el filtro IIR, el \textbf{Filtro FIR}:
+
+\begin{description}
+    \item[-] Tiene una respuesta al impulso finita, lo que significa que su salida depende solo de un número finito de entradas anteriores.
+    \item[-] Es fácil de diseñar e implementar.
+    \item[-] Tiende a ser más estable y menos propenso a problemas de inestabilidad.
+    \item[-] No involucra retroalimentación, lo que lo hace más adecuado para ciertas aplicaciones.
+\end{description}
+
+
+
+\paragraph{ERROR DE ESTADO ESTACIONARIO EN RAMPA:}
+\label{sec:ERROR DE ESTADO ESTACIONARIO EN RAMPA:}
+\hfill
+
+En las respuestas del sistema se observó cierto valor de error de estado estacionario al describirse una rampa. Y, aunque luego se termina corrigiendo rápidamente, durante la rampa se obtiene en cada instante una diferencia 27° entre el valor de refencia y la posición angular del robot en la simulación. Dicho error es posible mitigarlo y se propone como mejora.
+
+\paragraph{REPRESENTACIÓN EN PUNTO FIJO:}
+\label{sec:REPRESENTACIÓN EN PUNTO FIJO:}
+\hfill
+
+El controlador final obtenido es completamente discreto. El cual, en la aplicación correrá en un hardware digital. En el cual los números se almacenan en palabras binarias, es decir secuencias de bits (unos y ceros). Y la forma en que los componentes de hardware y las funciones de software interpretan esta secuencia de unos y ceros, viene definida por el tipo de datos. Se tiene que los números binarios se representan como tipos de datos de punto fijo o de punto flotante.
+
+Si bien la representación en punto fijo posee una menor precisión que la representación en punto flotante, los cálculos en punto fijo generalmente son más rápidos y consumen menos recursos que los cálculos en punto flotante, lo que los hace más adecuados para sistemas con restricciones de tiempo real, colo lo es la aplicación del presente proyecto. Además, la implementación en hardware de operaciones en punto fijo es generalmente más simple y eficiente, lo que la hace más atractiva para dispositivos embebidos y sistemas integrados.
+
+Por lo que, para la aplicación, se elige la representación en punto fijo.
+
+Dicho esto, entonces queda como mejora el generar un código eficiente representado en punto fijo a partir del modelo obtenido. Y también, simular el comportamiento matemático del hardware del ordenador. Para lo cual se propone, utilizar la herramienta de Fixed-Point Designer de MathWorks, el cual permite controlar los tipos de datos numéricos de las señales y sus parámetros, y optimizar el código, entre otras funcionalidades.
+
 
 \paragraph{EFECTOR FINAL:}
 \label{sec:EFECTOR FINAL:}
@@ -1794,7 +2196,6 @@ Una vez definida una aplicación en específico, se puede mejorar la prueba mono
 \hfill
 
 Por otro lado, aunque el proyecto se centró en realizar el control monoarticular de solo la primer articulación del robot, el control monoarticular de otra de sus articulaciones es relativamente similar. La mayor diferencia radica en el modelo mecánico, ya que en las demás articulaciones sí habría que incluir la gravedad a la hora de formular su modelo mecánico; debido a que cuando una articulación no posee su eje de giro siempre paralelo a la dirección de la aceleración de la gravedad, entonces esta sí influye en su movimiento. Además, el cálculo del momento de inercia equivalente se vería modificado. Y, con dichos cambios se verían obviamente modificados también los valores de las ganancias de la familia de controladores PID.
-
 
 
 
@@ -1852,14 +2253,18 @@ Lyons. Understanding Digital Signal Processing. 3ra edición, Prentice Hall
 \section*{Apéndice}
 % Material adicional que es importante agregar para dar un acabado entendimiento del reporte. Por ejemplo, código fuente, planos mecánicos o especificaciones de sensores.
 
-\subsubsection*{Código fuente en MATLAB:}
-
-\paragraph*{API para comunicación de CoppeliaSim con MATLAB}
-\label{sec:API para comunicación de CoppeliaSim con MATLAB}
+\paragraph*{Función S de nivel 2 de MATLAB}
+\label{sec:Función S de nivel 2 de MATLAB}
 \hfill
-%\inputminted{matlab}{SIMULACION_CoppeliaSim.m}
 
-\subsubsection*{Especificaciones de Sensores:}
+\inputminted{matlab}{SIMULACION_CoppeliaSim.m}
+
+
+\subsubsection*{Código fuente en MATLAB:}
+\label{sec:Código fuente en MATLAB:}
+\hfill
+
+\inputminted{matlab}{Codigo.m}
 
 
 
