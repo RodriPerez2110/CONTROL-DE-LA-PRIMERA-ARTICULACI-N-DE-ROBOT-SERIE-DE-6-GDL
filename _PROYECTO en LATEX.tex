@@ -35,7 +35,7 @@ anchorcolor = blue]{hyperref} % for hyperlinks
 % ======================================================================
 
 % Titulo
-\title{\textbf{CONTROL DE LA PRIMER ARTICULACIÓN DE ROBOT SERIE DE SEIS GRADOS DE LIBERTAD}}
+\title{\textbf{CONTROL DE LA PRIMERA ARTICULACIÓN DE ROBOT SERIE DE SEIS GRADOS DE LIBERTAD}}
 
 % Autores
 \author{Rodrigo Pérez \\ rodrigoperez2110@gmail.com \\ \\ Control y Sistemas, Facultad de Ingeniería, \\ Universidad Nacional de Cuyo, \\ Mendoza, Argentina}
@@ -68,7 +68,7 @@ anchorcolor = blue]{hyperref} % for hyperlinks
 % ======================================================================
 \begin{abstract}
     El presente documento presenta el proyecto final de la cátedra de Control y Sistemas de la Universidad Nacional de Cuyo.
-    El objetivo del es aplicar los conocimientos, herramientas y habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de posición para el accionamiento electromecánico de la primer articulación del robot Universal UR10 figura \ref{fig:UR10-UNIVERSAL-ROBOT}, un robot industrial tipo serie de 6 grados de libertad.
+    El objetivo del es aplicar los conocimientos, herramientas y habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de posición para el accionamiento electromecánico de la primera articulación del robot Universal UR10 figura \ref{fig:UR10-UNIVERSAL-ROBOT}, un robot industrial tipo serie de 6 grados de libertad.
 
     El robot se modela como un sistema lineal variante en el tiempo (LTI), en donde se toma al momento de inercia como un parámetro variable de entrada al modelo de la planta, y se utiliza un tipo de controlador PID junto con la técnica de planificación de ganancias (en inglés: gain scheduling) para lograr el correcto seguimiento de consignas y rechazo de perturbaciones.
 
@@ -94,13 +94,13 @@ Para controlar un sistema no lineal, con la estratagia de control PID, básicame
 \begin{itemize}
     \item 1) LINEALIZANDO EL SISTEMA: Si el sistema es no lineal pero está cerca de ser lineal, es decir si se pueden despreciar sus no linealizades, obteniendo un modelo que se corresponda con el real dentro de una tolerancia dada por la aplicación.
 
-    \item 2) UTILIZANDO PLANIFICACIÓN DE GANANCIAS (GAIN SCHEDULING): Ahora, si las no linealidas son demasiadas, una aproximación común es aplicar la estrategia llamada planificación de ganancias. En esta estrategia de control, básicamente primero se debe linealizar el sistema no lineal alrededor de diferentes puntos de operación, definidos de manera distribuida para todo el espectro en el que puede cambiar los parámetros y/o el comportamiento del sistema. Y luego, se crea una familia de controladores PID uno para cada punto, y se ajusta cada uno de ellos para que sea óptimo en su punto de operación. Finalmente, se hace que, de forma automática, el sistema de control alterne entre estos modelos lineales mientras se opera el sistema de tal forma de tener el mejor control lineal en cada punto donde se opere.
+    \item 2) UTILIZANDO PLANIFICACIÓN DE GANANCIAS (GAIN SCHEDULING): Ahora, si las no linealidas son demasiadas, una aproximación común es aplicar la estrategia llamada planificación de ganancias. En esta estrategia de control, básicamente primerao se debe linealizar el sistema no lineal alrededor de diferentes puntos de operación, definidos de manera distribuida para todo el espectro en el que puede cambiar los parámetros y/o el comportamiento del sistema. Y luego, se crea una familia de controladores PID uno para cada punto, y se ajusta cada uno de ellos para que sea óptimo en su punto de operación. Finalmente, se hace que, de forma automática, el sistema de control alterne entre estos modelos lineales mientras se opera el sistema de tal forma de tener el mejor control lineal en cada punto donde se opere.
     Para un sistema que tiene un comportamiento diferente en distintas regiones operativas, (es decir, para un sistema no lineal), dicha estrategia de control será subóptima. Esta suboptimalidad puede ser tan leve que pase desapercibida, o podría ser lo suficientemente grave como para hacer que sea inviable aplicarlo al sistema real, por lo que se evaluará su optimalidad.
 \end{itemize}
 
 Como un robot serie posea grandes no linealidades, en el proyecto se aplicará la estrategía de gain scheduling.
 
-El resultado esperado del proyecto es lograr manipular correctamente la dinámica del robot, de forma tal que se obtenga a cada instante de tiempo la posición angular deseada de su primer articulación, y tal que se mantenga una respuesta aceptable ante pertubaciones externas de torque en la carga mecánica del robot.
+El resultado esperado del proyecto es lograr manipular correctamente la dinámica del robot, de forma tal que se obtenga a cada instante de tiempo la posición angular deseada de su primera articulación, y tal que se mantenga una respuesta aceptable ante pertubaciones externas de torque en la carga mecánica del robot.
 
 
 
@@ -169,7 +169,7 @@ La utilización de un software de simulación externo a MATLAB, como lo es Coppe
 \label{sec:SIMULACIÓN CON COPPELIASIM}
 \hfill
 
-Como primera medida de desarrollo del proyecto, se procedió a lograr mover todas las articulaciones del robot UR10 de la simulación en CoppeliaSim, a partir del pasaje de comandos de posición angular desde MATLAB/Simulink.
+Como primeraa medida de desarrollo del proyecto, se procedió a lograr mover todas las articulaciones del robot UR10 de la simulación en CoppeliaSim, a partir del pasaje de comandos de posición angular desde MATLAB/Simulink.
 
 Para ello, en Simulink se necesitó hacer uso de una Función S de MATLAB de nivel 2 \cite{Level-2_MATLAB_S-Functions}. A dicha función se le colocó como entradas a las posiciones angulares, las cuales son ingresadas manualmente por medio de un panel con sliders creado en Simulink, o bien introduciendo los valores deseados de los ángulos en grados. Dichas posiciones angulares, dentro de la Función S de MATLAB de nivel 2 son transferidos a la simulación de CoppeliaSim mediante el uso de las funciones API para MATLAB que ofrece CoppeliaSim. Como se muestra en la figura \ref{fig:Movimiento del robot en CoppeliaSim, mediante panel en Simulink}, se logró mover exitosamente las articulaciones del robot.
 
@@ -255,7 +255,7 @@ Eslabón 6 & 0.00040 & 0.00041 & 0.00034 & 0.00000 & 0.00000  & 0.00000 & 3er Ma
 \subparagraph{Centro De Masa De Cada Eslabón:}
 \label{sec:Centro De Masa De Cada Eslabón:}
 \hfill \break
-La tabla \ref{table:Centro De Masa De Cada Eslabón}, muestra la posición, en metros, de los centros de masa (CM) de cada eslabón, los cuales serán útiles a la hora de calcular el momento de inercia de la primer articulación del robot. Como se explica en la sección \ref{sec:Cálculo Del Momento De Inercia Equivalente:}, las coordenadas de dichas posiciones se encuentran referenciadas a la trama móvil de cada eslabón. Dichos valores de coordenadas fueron obtenidos de la simulación en CoppeliaSim.
+La tabla \ref{table:Centro De Masa De Cada Eslabón}, muestra la posición, en metros, de los centros de masa (CM) de cada eslabón, los cuales serán útiles a la hora de calcular el momento de inercia de la primera articulación del robot. Como se explica en la sección \ref{sec:Cálculo Del Momento De Inercia Equivalente:}, las coordenadas de dichas posiciones se encuentran referenciadas a la trama móvil de cada eslabón. Dichos valores de coordenadas fueron obtenidos de la simulación en CoppeliaSim.
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{l|lll|lll|l}
@@ -319,7 +319,7 @@ La tabla \ref{table:Límites Articulares, Velocidades Angulares Máximas y Torqu
 
 Las aplicaciones de los robots serie, implican que estos muevan dos o más de sus articulaciones simultáneamente, mediante un Método de Control Multiarticular. Pero, en tal caso se tiene un sistema de múltiples entradas y múltiples salidas (MIMO) con 6 variables de entrada y 6 de salida, y para utilizar un control de tipo PID como se propuso en la introducción, entonces se tendría que poder realizar el tunning de los parámetros a 6 Controladores PID, uno por cada articulación.
 
-Esto resulta prácticamente inviable, ya que al lograr tunear un primer PID correspondiente a una de las variables, y comenzar a tunear otro, hay que volver a tunear el primero. Esto es, ya que una variable influencia en la respuesta de la otra variable, debido al que existe un acoplamiento entre las mismas. Entonces se tendría que estar modificando permanentemente ambos controladores PID, hasta que en algún momento funcione todo bien y no se sigan modificando.
+Esto resulta prácticamente inviable, ya que al lograr tunear un primera PID correspondiente a una de las variables, y comenzar a tunear otro, hay que volver a tunear el primerao. Esto es, ya que una variable influencia en la respuesta de la otra variable, debido al que existe un acoplamiento entre las mismas. Entonces se tendría que estar modificando permanentemente ambos controladores PID, hasta que en algún momento funcione todo bien y no se sigan modificando.
 
 Y si tunear dos Controladoes PID es complicado, tunear 6 Controladores PID resulta prácticamente imposible, ya que al modificar los parámetros de uno, se deben modificar los parámetros de los otros 5, hasta lograr cumplir con los objetivos de control.
 Por este motivo, no sería factible utilizar el control PID, sino que se necesitaría hacer uso de otra técnica de control, como una técnica de control no lineal con realimentación completa del vector de estados.
@@ -366,7 +366,7 @@ Pero en el proyecto toma la simplificación de considerar solo un sensor de posi
 \subsubsection{Elaboración del Modelo:}
 \label{sec:Elaboración del Modelo:}
 
-Como se explicará en la sección \ref{sec:CONTROLADOR} donde se diseña al controlador, la primer etapa para implementar la técnica de control gain scheduling, es obtener un modelo lineal de la planta a controlar.
+Como se explicará en la sección \ref{sec:CONTROLADOR} donde se diseña al controlador, la primera etapa para implementar la técnica de control gain scheduling, es obtener un modelo lineal de la planta a controlar.
 Desde el punto de vista de transformaciones de energía, el modelo del sistema consiste de tres subsistemas: el subsistema mecánico, el subsistema electromagnético y el subsistema térmico. Aunque como se menconó el subsistema térmico no será tenido en cuenta.
 
 \subsubsection{SUBSISTEMA MECÁNICO:}
@@ -384,13 +384,13 @@ Para obtener el modelo matemático lineal del comportamiento no lineal de la car
 la carga posee un comportamiento lineal, mediante el uso de, en principio, los siguientes dos parámetros equivalentes variables:
 \begin{itemize}
     \item Momento de inercia equivalente (variable):
-    \\ Al cambiar el ángulo de alguna otra articulación del robot, diferente a la primera, el momento de inercia respecto al eje de rotación que experimenta la primer articulación varia, y se toma como un parámetro variable.
+    \\ Al cambiar el ángulo de alguna otra articulación del robot, diferente a la primeraa, el momento de inercia respecto al eje de rotación que experimenta la primera articulación varia, y se toma como un parámetro variable.
 
     \item Amortiguamiento viscoso equivalente (variable):
     \\ Este amortiguamiento, además de involucrar al coeficiente constante de la fricción  propia de la articulación, también corresponde a una fricción ficticia, con la cual se logra involucrar de forma equivalente los efectos de las fuerzas centrífugas y de Coriolis que aparecen cuando se mueven las demás articulaciones.
 \end{itemize}
 Es decir, con dichos parámetros se obtendrá un modelo lineal de parámetros variables (LPV), en donde se tiene una incertidumbre en cuál es el valor de dichos parámetros, en función de cuál es el estado dinámico de las demás articulaciones.
-Aunque, debido a la simplificación de considerar un método de control monoarticular, entonces al moverse la primera articulación, la velocidad y aceleración de las demás 5 articulaciones son siempre cero. Por ello, también sus fuerzas centrífugas y de Coriolis serán siempre nulas, y por lo tanto no se necesita el amortiguamiento ficticio viscoso equivalente variable. Es decir, que solo se necesita considerar como parámetro variable, al momento de inercia equivalente.
+Aunque, debido a la simplificación de considerar un método de control monoarticular, entonces al moverse la primeraa articulación, la velocidad y aceleración de las demás 5 articulaciones son siempre cero. Por ello, también sus fuerzas centrífugas y de Coriolis serán siempre nulas, y por lo tanto no se necesita el amortiguamiento ficticio viscoso equivalente variable. Es decir, que solo se necesita considerar como parámetro variable, al momento de inercia equivalente.
 
 \hfill
 
@@ -401,11 +401,11 @@ Aunque, debido a la simplificación de considerar un método de control monoarti
 
 \hfill
 
-A continuación, se procede a obtener la fórmula matemática para el cálculo del momento de inercia equivalente respecto al eje de giro de la primer articulación del robot; momento de inercia que es variante en el tiempo, ya que depende de cuál sea la posición instantánea de las articulaciones superiores del robot.
+A continuación, se procede a obtener la fórmula matemática para el cálculo del momento de inercia equivalente respecto al eje de giro de la primera articulación del robot; momento de inercia que es variante en el tiempo, ya que depende de cuál sea la posición instantánea de las articulaciones superiores del robot.
 
 Todos los cálculos nescesarios para la obtención de dicho momento de inercia, serán realizados dentro de la Función S de MATLAB de nivel 2, mencionada en la sección \ref{sec:SIMULACIÓN CON COPPELIASIM}, de tal forma de poderla actualizar en cada iteración.
 
-Por otro lado, es aclaratorio mencionar que el eje de giro de la primer articulación del robot se lo colocó, en la simulación de CoppeliaSim, en las coordenadas absolutas X=0 e Y=0 con la finalidad de hacerlo colineal al eje Z absoluto de la escena de CoppeliaSim.
+Por otro lado, es aclaratorio mencionar que el eje de giro de la primera articulación del robot se lo colocó, en la simulación de CoppeliaSim, en las coordenadas absolutas X=0 e Y=0 con la finalidad de hacerlo colineal al eje Z absoluto de la escena de CoppeliaSim.
 
 \hfill \break
 Marcos De Referencia:
@@ -425,12 +425,12 @@ Marcos De Referencia:
 %     \item[CME\_Mallas:] Centros de Masas respecto a las tramas de las Mallas de los Eslabones.
 %     \item[CME\_Mundo] Centros de Masa de los Eslabónes, respecto al Mundo (posiciones absolutas).
 %     \item[IE\_OL] Momento de Inercia de los Eslabones con respecto a un eje arbitrario OL
-%     \item[I] Momento de Inercia Equivalente del robot, respecto del eje de rotación (eje vertical Z) de su primera articulación.
+%     \item[I] Momento de Inercia Equivalente del robot, respecto del eje de rotación (eje vertical Z) de su primeraa articulación.
 %     \item[IE] Momentos y Productos de Inercia de los Eslabones del robot.
 %     \item[IE\_OL] Momentos de Inercia de los Eslabones del robot, respecto a un eje arbitrario OL.
 % \end{description}
 
-Como se observa en la ecuación \ref{eq:J_Z}, el momento de inercia $J_Z$ respecto del eje vertical Z de rotación de la primer articulación del robot, en una configuración genérica (fija) de sus articulaciones, es igual a la suma de los momentos de inercia $J_{Ei_Z}$ de cada i-eslabón respecto al eje Z. En donde, como muestra la ecuación \ref{eq:J_Ei_Z}, el momento de inercia $J_{Ei_Z}$ del eslabón-i es igual al momento de inercia $J_{Ei_{Z_{CM}}}$ del eslabón respecto al eje $Z_{CM}$ que es paralelo al eje Z y que pasa por su Centro de Masa (CM); más la masa del eslabón multiplicada por el cuadrado de la distancia $D_{Ei_{CM_{XY}}}$ del eslabón-i, entre el eje Z absoluto, y su CM, a lo largo del plano XY.
+Como se observa en la ecuación \ref{eq:J_Z}, el momento de inercia $J_Z$ respecto del eje vertical Z de rotación de la primera articulación del robot, en una configuración genérica (fija) de sus articulaciones, es igual a la suma de los momentos de inercia $J_{Ei_Z}$ de cada i-eslabón respecto al eje Z. En donde, como muestra la ecuación \ref{eq:J_Ei_Z}, el momento de inercia $J_{Ei_Z}$ del eslabón-i es igual al momento de inercia $J_{Ei_{Z_{CM}}}$ del eslabón respecto al eje $Z_{CM}$ que es paralelo al eje Z y que pasa por su Centro de Masa (CM); más la masa del eslabón multiplicada por el cuadrado de la distancia $D_{Ei_{CM_{XY}}}$ del eslabón-i, entre el eje Z absoluto, y su CM, a lo largo del plano XY.
 
 \begin{align} \label{eq:J_Z}
 	J_Z=\sum_{i=1}^{i=6}J_{Ei_Z}
@@ -502,7 +502,7 @@ Ahora las coordenadas $CM_{Ei_X}$ y $CM_{Ei_Y}$ no son brindadas por CoppeliaSim
 En donde:
 \begin{itemize}
     \item Las coordenadas X e Y de la posición absoluta del origen de coordenadas de la trama de la malla del eslabón-i $PT_{Ei_X}$ y $PT_{Ei_Y}$, son recibidas dentro de la Función S de MATLAB de nivel 2, las cuales son obtenidas desde CoppeliaSim haciendo usa de la API.
-    \item las distancias $D_{Ei_{(T-CM)_X}}$ y $D_{Ei_{(T-CM)_X}}$ son calculadas a partir de: las coordenadas del centro de masa del eslabón-i relativas a su trama $CM_{Ei_{Tx}}$, $CM_{Ei_{Ty}}$ y $CM_{Ei_{Tz}}$, junto con las orientaciones de los eslabones mediante el respectivo uso de la primer ($MR_1$) y segunda ($MR_2$) columnas de la matriz de rotación del eslabón. Tal y como se muestra en la ecuación \ref{eq:D_Ei_(T-CM)_X y D_Ei_(T-CM)_X}.
+    \item las distancias $D_{Ei_{(T-CM)_X}}$ y $D_{Ei_{(T-CM)_X}}$ son calculadas a partir de: las coordenadas del centro de masa del eslabón-i relativas a su trama $CM_{Ei_{Tx}}$, $CM_{Ei_{Ty}}$ y $CM_{Ei_{Tz}}$, junto con las orientaciones de los eslabones mediante el respectivo uso de la primera ($MR_1$) y segunda ($MR_2$) columnas de la matriz de rotación del eslabón. Tal y como se muestra en la ecuación \ref{eq:D_Ei_(T-CM)_X y D_Ei_(T-CM)_X}.
 \end{itemize}
 
 \begin{subequations} \label{eq:D_Ei_(T-CM)_X y D_Ei_(T-CM)_X}
@@ -574,7 +574,7 @@ Particularmente, se obtuvo el valor máximo y mínimo del $J_Z$, dado que serán
 
 Una vez obtenido nuestro parámetro equivalente variable $J_Z$, se procede con la obtención del modelo de la carga mecánica.
 
-En la Figura \ref{fig:Descripción esquemática clásica de una transmisión} se muestra la descripción esquemática clásica de una transmisión que representa a la articulación del robot, figura obtenida de \cite{arenas2023virtual}. En donde $J_l=J_Z$ es el momento de inercia calculado, y se encuentra referido al eje de salida de la caja reductora de la primer articulación.
+En la Figura \ref{fig:Descripción esquemática clásica de una transmisión} se muestra la descripción esquemática clásica de una transmisión que representa a la articulación del robot, figura obtenida de \cite{arenas2023virtual}. En donde $J_l=J_Z$ es el momento de inercia calculado, y se encuentra referido al eje de salida de la caja reductora de la primera articulación.
 
 \begin{figure}[H]
     \centering
@@ -1051,7 +1051,7 @@ Mientras que las ecuaciones \ref{eq:e expresada en función de K_E} y \ref{eq:T_
 \subsubsection{MODELO COMPLETO DE LA PLANTA:}
 \label{sec:MODELO COMPLETO DE LA PLANTA:}
 
-Una vez descritas las ecuaciones (diferenciales de primer orden) que modelan a cada subsistema, es posible reorganizarlas y combinarlas de tal forma de representar al sistema físico completo como un conjunto de variables de entrada, de salida y de estado.
+Una vez descritas las ecuaciones (diferenciales de primera orden) que modelan a cada subsistema, es posible reorganizarlas y combinarlas de tal forma de representar al sistema físico completo como un conjunto de variables de entrada, de salida y de estado.
 
 Reemplazando $T_m$ de la ecuación \ref{eq:subsistema mecánico completo} del subsistema mecánico por la expresión \ref{eq:T_m expresada en función de K_T}, y reemplazando $e$ de la ecuación \ref{eq:subsistema electromagnético} del subsistema electromagnético por la expresión \ref{eq:e expresada en función de K_E}, se obtiene el modelo en espacio de estados del sistema completo:
 
@@ -1391,7 +1391,7 @@ Se tiene que el \textbf{modelo de diseño (de la planta)} obtenido, es ul conjun
 
 Y se tiene que el \textbf{modelo de validación (de la planta)}, sería un único modelo que incluiría todas las no linealidades del robot. Pero en realidad este modelo no lineal terminaría siendo lo mismo que el modelo lineal, porque:
 
-\textbf{1) No se necesita considerar el modelado de vibraciones producidas en las articulaciones del robot por el movimiento de la primera articulación, ya que:}
+\textbf{1) No se necesita considerar el modelado de vibraciones producidas en las articulaciones del robot por el movimiento de la primeraa articulación, ya que:}
 
 - Las articulaciones que más influirían serían las del hombro y el codo, por sostener a los eslabónes más largos, pero los ejes de giro de estás son siempre perpendiculares al eje Z de giro de la articulación base.
 
@@ -1426,7 +1426,7 @@ Las matrices de controlabilidad y de observabilidad del criterio de Kalman son r
 
 En donde, debido a que un sistema no se puede controlar a través de sus entradas de perturbación externas, se divide a la matriz de entrada $B$ de la ecuación \ref{eq:modelo completo de la planta en forma matricial} de estados de la planta, en los siguientes dos vectores:
 \begin{description}
-    \item $B_{v_a}$ igual a la primer columna de la matriz $B$, correspondiente a la variable manipulada del sistema.
+    \item $B_{v_a}$ igual a la primera columna de la matriz $B$, correspondiente a la variable manipulada del sistema.
     \item $B_{T_l}$ igual a la segunda columna de la matriz $B$, correspondiente a la variable de perturvación del sistema.
 \end{description}
 Y solo se considera al vector $B_{v_a}$ para analizar la controlabilidad del sistema.
@@ -1723,15 +1723,15 @@ Al sensor se lo modelo como un conversor A/D, al cual se le agrega ruido para si
     \label{fig:Conversor Analógico Digital}
 \end{figure}
 
-\paragraph{Primera Etapa del Modelo de un Conversor A/D:}
-\label{sec:Primera Etapa del Modelo de un Conversor A/D:}
+\paragraph{primeraa Etapa del Modelo de un Conversor A/D:}
+\label{sec:primeraa Etapa del Modelo de un Conversor A/D:}
 \hfill
 
 \hfill
 
-La primera etapa del modelo consiste en el muestreo y retención (en inglés: sample and hold) de la señal de salida continua y variable en el tiempo $x(t)$, proveniente del sistema.
+La primeraa etapa del modelo consiste en el muestreo y retención (en inglés: sample and hold) de la señal de salida continua y variable en el tiempo $x(t)$, proveniente del sistema.
 
-El objetivo de esta primera etapa, es simplemente el del mantener por un tiempo determinado un valor típicamente de tensión a la entrada del conversor A/D. Lo cual es necesario ya que el conversor A/D no puede realizar la conversión del valor de tensión a un valor binario de forma instantánea, sino que le toma un cierto tiempo finito distinto de cero. Cabe aclarar que para el caso de un encoder absoluto físico, este no utiliza un valor de tensión proporcional a la variable que mide, sino que realiza el muestreo y retención físicamente, con el propio mecanismo con el que funciona.
+El objetivo de esta primeraa etapa, es simplemente el del mantener por un tiempo determinado un valor típicamente de tensión a la entrada del conversor A/D. Lo cual es necesario ya que el conversor A/D no puede realizar la conversión del valor de tensión a un valor binario de forma instantánea, sino que le toma un cierto tiempo finito distinto de cero. Cabe aclarar que para el caso de un encoder absoluto físico, este no utiliza un valor de tensión proporcional a la variable que mide, sino que realiza el muestreo y retención físicamente, con el propio mecanismo con el que funciona.
 
 La etapa de muestreo y retención se la simula en Simulink mediante un retenerdor de orden cero, bloque llamado: zero-order hold (ZOH), al cual se le ingresa como parámetro el periodo de muestreo T. El valor de T se obtiene al extraer la variable de salida $\theta_m$, de la cual se obtiene el vector de tiempo tout de dicha señal. Y si se comprueba que paso de tiempo $\Delta t$ de dicho vector se mantiene igual, entonces se utiliza este como tiempo de muestreo en el bloque ZOH. Así se obtuvo un período $T=\Delta t=0,01s$.
 
@@ -1907,7 +1907,7 @@ El diagrama en bloques del sistema completo obtenido es:
 % En MATLAB se utiliza la función \cite{c2d}: \textbf{SYSD = c2d(SYSC, TS, METHOD)} para obtener el modelo discreto SYSD, con tiempo de muestreo TS, de un modelo continuo SYSC, mediante el uso del método METHOD, el cual puede ser uno de los siguientes métodos:
 % \begin{description}
 %     \item ['\textbf{zoh}':] Retención de Orden Cero (siglas del inglés: zero-order hold) o Discretización Invariante al Escalón.
-%     \item ['\textbf{foh}':] Retención de Primer Orden (siglas del inglés: first-order hold) o Aproximación Triangular.
+%     \item ['\textbf{foh}':] Retención de primera Orden (siglas del inglés: first-order hold) o Aproximación Triangular.
 %     \item ['\textbf{impulse}':] Discretización de Impulso Invariante.
 %     \item ['\textbf{tustin}':] Transformación Bilineal (Tustin).
 %     \item ['\textbf{matched}':] Método de Correspondencia de Polos y Ceros.
@@ -1936,7 +1936,7 @@ El diagrama en bloques del sistema completo obtenido es:
 %     \label{fig:Comparación de la respuesta ante un escalón, entre modelo continuo dado y su discretización utilizando el método del impulso y el método de zoh respectivamente}
 % \end{figure}
 
-% Por otro lado, el \textbf{método (foh) de retención de primer orden}, es similar al método zoh, solo que en lugar de mantenener el último valor muestreado constante, mantiene la pendiente constante, produciendo una serie de rampas en lugar de una serie de escalones como en el zoh. Por ello, el método foh conserva la respuesta ante una rampa de entrada, y por ello se lo suele también llamar método de rampa invariante.
+% Por otro lado, el \textbf{método (foh) de retención de primera orden}, es similar al método zoh, solo que en lugar de mantenener el último valor muestreado constante, mantiene la pendiente constante, produciendo una serie de rampas en lugar de una serie de escalones como en el zoh. Por ello, el método foh conserva la respuesta ante una rampa de entrada, y por ello se lo suele también llamar método de rampa invariante.
 
 % Los tres métodos mencionados (zoh, foh e impulse) producen una respuesta en el tiempo precisa, respectivamente ante una entrada de escalón, rampa o impulso. Sin embargo, el \textbf{método (matched) de correspondencia de polos y ceros}, no trata de tener una respuesta precisa en el tiempo como su contraparte en el dominio S, ni siquiera produce una respuesta en la frecuencia simular. Por esto, el método matched además de ser solo aplicable para sistemas SISO, es como mucho solo un recurso provisional y prácticamente no es utilizado, sino que se prefiere utilizar otro de los métodos. Sino que este método se enfoca en responder a la pregunta: ¿qué ocurre si se mueve cada polo y cero en el dominio S, a su correspondiente lugar en el dominio Z?
 
@@ -1995,7 +1995,7 @@ El diagrama en bloques del sistema completo obtenido es:
 %     Z=e^{S.T}=1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...
 % \end{align}
 
-% De esta expasión, solo se toman los dos primeros términos para obtener la aproximación lineal de primer orden de Z:
+% De esta expasión, solo se toman los dos primeraos términos para obtener la aproximación lineal de primera orden de Z:
 
 % \begin{align}   \label{eq:Aproximación Lineal de Z}
 %     Z \approx 1+S.T
@@ -2013,13 +2013,13 @@ El diagrama en bloques del sistema completo obtenido es:
 %     \frac{e^{\frac{S.T}{2}}}{e^{\frac{-S.T}{2}}}=\frac{1+\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}+\frac{\left(S.T\right)^3}{6}+...}{1-\frac{S.T}{1}+\frac{\left(S.T\right)^2}{2}-\frac{\left(S.T\right)^3}{6}+...}
 % \end{align}
 
-% Con lo que, tomando como aproximación solo los primeros dos términos de las series, se obtiene la ecuación \ref{eq:Transformación Bilineal Inversa} de la transformación bilineal inversa utilizada en el método de Tustin:
+% Con lo que, tomando como aproximación solo los primeraos dos términos de las series, se obtiene la ecuación \ref{eq:Transformación Bilineal Inversa} de la transformación bilineal inversa utilizada en el método de Tustin:
 
 % \begin{align}   \label{eq:Transformación Bilineal Inversa Demostrada}
 %     Z \approx \frac{1+\frac{S.T}{2}}{1-\frac{S.T}{2}}
 % \end{align}
 
-% La cual es una mejor aproximación de primer orden que \ref{eq:Aproximación Lineal de Z}.
+% La cual es una mejor aproximación de primera orden que \ref{eq:Aproximación Lineal de Z}.
 
 % Cabe mencionar que cuando la constante de tiempo del sistema es lenta en comparación con los tiempos de muestreo, entonces todos los métodos de discretización producen respuestas prácticamente iguales, por lo que daría lo mismo cualquiere método. Pero, como se comentó, la idea es justamente tratar de utilizar un tiempo de muestreo lo más bajo posible, por lo que sí tiene importancia la elección de un método de discretización en particular.
 
@@ -2141,7 +2141,7 @@ En las siguiente dos figuras se puede percibir que el seguimiento de consigna es
 \section{CONCLUSIONES}
 \label{sec:CONCLUSIONES}
 
-Se concluye que en forma general se cumplieron los objetivos del proyecto, en el desarrollo del sistema de control de posición para el accionamiento electromecánico de la primer articulación del robot Universal UR10. Se modeló correctamente el sistema LTI en el espacio de estados, y se pudo aplicar la técnica de planificación de ganancias, obteniendo una familia de controladores I-PD, que lograron proporcionar un correcto seguimiento de consignas y rechazo de perturbaciones.
+Se concluye que en forma general se cumplieron los objetivos del proyecto, en el desarrollo del sistema de control de posición para el accionamiento electromecánico de la primera articulación del robot Universal UR10. Se modeló correctamente el sistema LTI en el espacio de estados, y se pudo aplicar la técnica de planificación de ganancias, obteniendo una familia de controladores I-PD, que lograron proporcionar un correcto seguimiento de consignas y rechazo de perturbaciones.
 
 Luego, se incorporó ruido en el proceso, y en el sensado de la posición, y luego se utiliza el filtro de Kalman con el objetivo de mitigar dichos ruidos. El filtro de Kalman se lo implentó en tiempo discreto, y con ello también se discretizó el controlador de forma exitosa. Con lo que también se logró un excelente seguimiento de la consigna y reachzo de perturbaciones, e incluso con una variable manipulada discreta la cual introduce un ruido importante en el sistema.
 
@@ -2188,14 +2188,14 @@ Dicho esto, entonces queda como mejora el generar un código eficiente represent
 \label{sec:EFECTOR FINAL:}
 \hfill
 
-Una vez definida una aplicación en específico, se puede mejorar la prueba monoarticular del robot, al agregarle un efector final al mismo, y una carga (si es que se correspondee con el tipo de efector final). Por ejemplo, podría ser una aplicación de pick and place para la alimentación de una máquina CNC, en donde se tendría una pinza robótica (en inglés: gripper) o bien una ventosa de vacío, para agarrar por ejemplo una pieza metálica de forma cilindrica a ser mecanizada. En tal caso, simplemente se debería incluir las masas, y momentos y productos de inercia del gripper y de la pieza a mover, en el cálculo del momento de inercia $J_Z$ de la primer articulación. Y como aumentaría el valor de dicho momento de inercia entonces además requeriría agregar más puntos de operación al aplicar el método de gain scheduling, para contemplar los mayores valores del parámetro variable.
+Una vez definida una aplicación en específico, se puede mejorar la prueba monoarticular del robot, al agregarle un efector final al mismo, y una carga (si es que se correspondee con el tipo de efector final). Por ejemplo, podría ser una aplicación de pick and place para la alimentación de una máquina CNC, en donde se tendría una pinza robótica (en inglés: gripper) o bien una ventosa de vacío, para agarrar por ejemplo una pieza metálica de forma cilindrica a ser mecanizada. En tal caso, simplemente se debería incluir las masas, y momentos y productos de inercia del gripper y de la pieza a mover, en el cálculo del momento de inercia $J_Z$ de la primera articulación. Y como aumentaría el valor de dicho momento de inercia entonces además requeriría agregar más puntos de operación al aplicar el método de gain scheduling, para contemplar los mayores valores del parámetro variable.
 
 
 \paragraph{CONTROL MONOARTICULAR DE CUALQUIER ARTICULACIÓN:}
 \label{sec:CONTROL MONOARTICULAR DE CUALQUIER ARTICULACIÓN:}
 \hfill
 
-Por otro lado, aunque el proyecto se centró en realizar el control monoarticular de solo la primer articulación del robot, el control monoarticular de otra de sus articulaciones es relativamente similar. La mayor diferencia radica en el modelo mecánico, ya que en las demás articulaciones sí habría que incluir la gravedad a la hora de formular su modelo mecánico; debido a que cuando una articulación no posee su eje de giro siempre paralelo a la dirección de la aceleración de la gravedad, entonces esta sí influye en su movimiento. Además, el cálculo del momento de inercia equivalente se vería modificado. Y, con dichos cambios se verían obviamente modificados también los valores de las ganancias de la familia de controladores PID.
+Por otro lado, aunque el proyecto se centró en realizar el control monoarticular de solo la primera articulación del robot, el control monoarticular de otra de sus articulaciones es relativamente similar. La mayor diferencia radica en el modelo mecánico, ya que en las demás articulaciones sí habría que incluir la gravedad a la hora de formular su modelo mecánico; debido a que cuando una articulación no posee su eje de giro siempre paralelo a la dirección de la aceleración de la gravedad, entonces esta sí influye en su movimiento. Además, el cálculo del momento de inercia equivalente se vería modificado. Y, con dichos cambios se verían obviamente modificados también los valores de las ganancias de la familia de controladores PID.
 
 
 
@@ -2257,14 +2257,14 @@ Lyons. Understanding Digital Signal Processing. 3ra edición, Prentice Hall
 \label{sec:Función S de nivel 2 de MATLAB}
 \hfill
 
-\inputminted{matlab}{SIMULACION_CoppeliaSim.m}
+% \inputminted{matlab}{SIMULACION_CoppeliaSim.m}
 
 
 \subsubsection*{Código fuente en MATLAB:}
 \label{sec:Código fuente en MATLAB:}
 \hfill
 
-\inputminted{matlab}{Codigo.m}
+% \inputminted{matlab}{Codigo.m}
 
 
 
