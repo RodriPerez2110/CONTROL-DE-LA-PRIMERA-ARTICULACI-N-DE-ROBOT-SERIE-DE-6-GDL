@@ -1,6 +1,6 @@
 RESUMEN:
 Proyecto final de la cátedra de Control y Sistemas de la Universidad Nacional de Cuyo. El objetivo es 
-aplicar LAS habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de 
+aplicar las habilidaddes adquiridas para realizar el modelado, análisis y simulación del control de 
 posición para el accionamiento electromecánico de la primera articulación del robot Universal UR10 
 figura 1, un robot industrial tipo serie de 6 grados de libertad.
 El robot se modela como un sistema lineal variante en el tiempo (LTI), en donde se toma al
